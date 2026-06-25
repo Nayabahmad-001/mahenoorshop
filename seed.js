@@ -13,11 +13,15 @@ const Order = require('./models/Order');
   const admin = await User.create({
     name: 'Mahenoor Store Owner', email: 'admin@mahenoor.com', password: 'admin123', phone: '9876543210', role: 'admin'
   });
+  const admin2 = await User.create({
+    name: 'Nayab Ahmad', email: 'nayab.ahmad7987@gmail.com', password: 'nayab@8969', phone: '0000000000', role: 'admin'
+  });
   const user = await User.create({
     name: 'Ravi Sharma', email: 'user@demo.com', password: 'user123', phone: '9876543211'
   });
 
   console.log(`Admin: admin@mahenoor.com / admin123`);
+  console.log(`Admin2: nayab.ahmad7987@gmail.com / nayab@8969`);
   console.log(`User:  user@demo.com / user123`);
 
   const ration = [

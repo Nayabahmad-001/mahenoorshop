@@ -1,5 +1,10 @@
 require('dotenv').config();
 require('express-async-errors');
+const dns = require('dns');
+
+// Fix DNS lookup for MongoDB Atlas when local resolver is unavailable.
+dns.setServers(['1.1.1.1', '8.8.8.8']);
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
