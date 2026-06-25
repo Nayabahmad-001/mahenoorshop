@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mahenoor Kirana Store - Daily Ration & Cold Drinks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0', 300: '#6ee7b7', 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b' },
+            energy: { 50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 md:h-20">
+        <a href="/" class="flex items-center gap-2.5 shrink-0">
+          <div class="w-9 h-9 rounded-lg bg-brand-600 text-white flex items-center justify-center text-lg font-bold">M</div>
+          <div class="leading-tight">
+            <span class="text-lg md:text-xl font-extrabold text-slate-800 tracking-tight">Mahenoor</span>
+            <span class="text-lg md:text-xl font-extrabold text-energy-600 tracking-tight">Kirana</span>
+          </div>
+        </a>
+        <div class="hidden md:flex flex-1 max-w-lg mx-6">
+          <div class="relative w-full">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="search-input" placeholder="Search atta, rice, cold drinks..." class="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+          </div>
+        </div>
+        <div class="flex items-center gap-2 md:gap-4">
+          <div class="hidden lg:flex items-center gap-1.5 text-xs">
+            <div class="relative">
+              <button onclick="toggleLocation()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition text-slate-600" id="location-btn">
+                <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span id="location-display" class="font-medium text-slate-700">Select Area</span>
+                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+              <div id="location-dropdown" class="hidden absolute top-full left-0 mt-1 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 p-4">
+                <p class="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Check Delivery Availability</p>
+                <div class="flex gap-2 mb-3">
+                  <input type="text" id="location-pincode" placeholder="Enter pincode" maxlength="6" class="flex-1 px-3 py-2 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                  <button onclick="checkPincode()" class="px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition">Check</button>
+                </div>
+                <div id="location-result" class="hidden text-xs mb-2"></div>
+                <p class="text-xs text-slate-400 mb-2">Or select a popular area:</p>
+                <div id="popular-areas" class="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto"></div>
+              </div>
+            </div>
+          </div>
+          <button onclick="openCartDrawer()" class="relative p-2 text-slate-600 hover:text-brand-600 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+            <span id="cart-count" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-energy-500 text-white text-xs font-bold flex items-center justify-center">0</span>
+          </button>
+          <a id="nav-auth" href="/pages/login.html" class="text-sm font-semibold text-slate-700 hover:text-brand-600 transition">Login</a>
+        </div>
+      </div>
+      <div class="lg:hidden flex items-center gap-2 pb-3">
+        <div class="relative flex-1">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <input type="text" id="mobile-pincode" placeholder="Enter pincode for delivery" maxlength="6" class="w-full pl-9 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+        <button onclick="checkMobilePincode()" class="px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition whitespace-nowrap">Check</button>
+      </div>
+      <div class="md:hidden pb-3">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="search-input-mobile" placeholder="Search products..." class="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="gradient-hero text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+      <div class="text-center md:text-left md:flex md:items-center md:justify-between">
+        <div class="max-w-xl">
+          <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-4">
+            <span class="w-2 h-2 rounded-full bg-green-300 animate-pulse"></span> Same Day Delivery
+          </div>
+          <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">Fresh Ration &<br><span class="text-energy-300">Chilled Drinks</span></h1>
+          <p class="text-white/80 text-base md:text-lg mb-6">Best prices on daily essentials — Atta, Rice, Oil, Cold Drinks & more with <strong class="text-energy-300">huge savings</strong> every day!</p>
+          <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+            <a href="#products" class="inline-flex items-center gap-2 bg-white text-brand-700 font-bold px-6 py-3 rounded-xl hover:bg-brand-50 transition shadow-lg">Shop Now
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <a href="#deals" class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/20 transition">View Deals</a>
+          </div>
+        </div>
+        <div class="hidden md:block text-8xl opacity-20">🛒</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Tabs -->
+  <div class="bg-white border-b border-slate-200 sticky top-16 md:top-20 z-40" id="products">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex gap-2 py-3 overflow-x-auto scrollbar-hide">
+        <button class="category-tab active flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-brand-600 bg-brand-600 text-white font-semibold text-sm whitespace-nowrap" data-category="all">
+          <span>🏪</span> All Items
+        </button>
+        <button class="category-tab flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-semibold text-sm hover:border-brand-300 whitespace-nowrap" data-category="Daily Ration">
+          <span>🍚</span> Daily Ration
+        </button>
+        <button class="category-tab flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-semibold text-sm hover:border-brand-300 whitespace-nowrap" data-category="Cold Drinks">
+          <span>🥤</span> Cold Drinks
+        </button>
+        <select id="sort-select" class="ml-auto px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-600 bg-white focus:outline-none focus:border-brand-500">
+          <option value="">Sort: Latest</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+          <option value="discount">Biggest Discount</option>
+          <option value="name">Name A-Z</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div id="products-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5"></div>
+    <div id="loader" class="text-center py-16 hidden">
+      <div class="inline-block w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+      <p class="mt-3 text-slate-500 text-sm">Loading products...</p>
+    </div>
+    <div id="pagination"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-white mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="grid md:grid-cols-3 gap-8">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-sm">M</div>
+            <span class="text-lg font-bold">Mahenoor <span class="text-energy-500">Kirana</span></span>
+          </div>
+          <p class="text-slate-400 text-sm">Your trusted neighborhood kirana store — now online! Best quality daily ration and chilled drinks at the lowest prices.</p>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-400">Quick Links</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="/" class="text-slate-300 hover:text-white transition">Home</a></li>
+            <li><a href="/pages/my-orders.html" class="text-slate-300 hover:text-white transition">My Orders</a></li>
+            <li><a href="/pages/profile.html" class="text-slate-300 hover:text-white transition">Profile</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-400">Contact</h4>
+          <ul class="space-y-2 text-sm text-slate-300">
+            <li class="flex items-center gap-2">📞 +91 98765 43210</li>
+            <li class="flex items-center gap-2">✉️ hello@mahenoorkirana.com</li>
+            <li class="flex items-center gap-2">📍 Shop No. 7, Main Bazaar, India</li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-slate-800 mt-8 pt-6 text-center text-slate-500 text-sm">&copy; 2026 Mahenoor Kirana Store. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- Cart Drawer -->
+  <div class="cart-overlay" id="cart-overlay" onclick="closeCartDrawer()"></div>
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="flex items-center justify-between p-5 border-b border-slate-200">
+      <h2 class="text-lg font-bold text-slate-800">Your Cart</h2>
+      <button onclick="closeCartDrawer()" class="p-1.5 hover:bg-slate-100 rounded-lg transition text-slate-400 hover:text-slate-600">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="cart-drawer-items" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+    <div id="cart-drawer-footer" class="border-t border-slate-200 p-5"></div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Mahenoor Kirana Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{brand:{600:'#059669',700:'#047857'},energy:{500:'#f97316',600:'#ea580c'}}}}}</script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+      <a href="/" class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-sm">M</div><span class="font-extrabold text-lg">Mahenoor <span class="text-energy-600">Kirana</span></span></a>
+      <div class="flex items-center gap-4 text-sm font-medium"><a href="/" class="text-slate-600 hover:text-brand-600">Home</a><a id="nav-auth" href="/pages/login.html" class="text-slate-600 hover:text-brand-600">Login</a></div>
+    </div>
+  </nav>
+
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex items-center gap-3 mb-6">
+      <a href="/" class="text-slate-400 hover:text-slate-600 transition">&larr; Back</a>
+      <h1 class="text-2xl font-extrabold text-slate-800">My Profile</h1>
+    </div>
+
+    <div id="not-logged-in" class="hidden text-center py-16 text-slate-400">
+      <p class="text-lg">Please <a href="/pages/login.html" class="text-brand-600 font-semibold">login</a> to view your profile.</p>
+    </div>
+
+    <div id="profile-content" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-16 h-16 rounded-full bg-brand-600 text-white flex items-center justify-center text-2xl font-bold" id="profile-avatar"></div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-800" id="profile-name"></h2>
+            <p class="text-sm text-slate-400" id="profile-email"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">Edit Details</h3>
+        <div id="profile-alert" class="hidden p-3 rounded-xl text-sm font-medium mb-4"></div>
+        <form id="profile-form" class="space-y-4">
+          <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">Full Name</label><input type="text" id="p-name" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition"></div>
+          <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">Phone Number</label><input type="tel" id="p-phone" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="10-digit mobile number"></div>
+          <div class="border-t border-slate-100 pt-4">
+            <h4 class="text-sm font-bold text-slate-700 mb-3">Default Address</h4>
+            <div class="space-y-3">
+              <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">Street / Area</label><input type="text" id="p-street" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="House no., street, locality"></div>
+              <div class="grid grid-cols-3 gap-3">
+                <div class="col-span-1"><label class="block text-sm font-semibold text-slate-700 mb-1.5">City</label><input type="text" id="p-city" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition"></div>
+                <div class="col-span-1"><label class="block text-sm font-semibold text-slate-700 mb-1.5">State</label><input type="text" id="p-state" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition"></div>
+                <div class="col-span-1"><label class="block text-sm font-semibold text-slate-700 mb-1.5">Pincode</label><input type="text" id="p-pincode" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" maxlength="6"></div>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Save Changes
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    async function loadProfile() {
+      if (!isLoggedIn()) {
+        document.getElementById('not-logged-in').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('profile-content').classList.remove('hidden');
+      try {
+        const res = await apiCall('/auth/me');
+        const u = res.user;
+        document.getElementById('profile-avatar').textContent = u.name.charAt(0).toUpperCase();
+        document.getElementById('profile-name').textContent = u.name;
+        document.getElementById('profile-email').textContent = u.email;
+        document.getElementById('p-name').value = u.name || '';
+        document.getElementById('p-phone').value = u.phone || '';
+        document.getElementById('p-street').value = u.address?.street || '';
+        document.getElementById('p-city').value = u.address?.city || '';
+        document.getElementById('p-state').value = u.address?.state || '';
+        document.getElementById('p-pincode').value = u.address?.pincode || '';
+      } catch (err) {
+        document.getElementById('profile-content').innerHTML = `<p class="text-red-500">${err.message}</p>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProfile();
+      const form = document.getElementById('profile-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const alert = document.getElementById('profile-alert');
+        try {
+          const payload = {
+            name: document.getElementById('p-name').value,
+            phone: document.getElementById('p-phone').value,
+            address: {
+              street: document.getElementById('p-street').value,
+              city: document.getElementById('p-city').value,
+              state: document.getElementById('p-state').value,
+              pincode: document.getElementById('p-pincode').value
+            }
+          };
+          const res = await apiCall('/auth/profile', { method: 'PUT', body: JSON.stringify(payload) });
+          const u = res.user;
+          localStorage.setItem('user', JSON.stringify(u));
+          document.getElementById('profile-avatar').textContent = u.name.charAt(0).toUpperCase();
+          document.getElementById('profile-name').textContent = u.name;
+          alert.className = 'block p-3 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200';
+          alert.textContent = 'Profile updated successfully!';
+          alert.classList.remove('hidden');
+          setTimeout(() => { alert.className = 'hidden'; }, 3000);
+        } catch (err) {
+          alert.className = 'block p-3 rounded-xl text-sm font-medium bg-red-50 text-red-600 border border-red-200';
+          alert.textContent = err.message;
+          alert.classList.remove('hidden');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Mahenoor Kirana</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{brand:{500:'#10b981',600:'#059669',700:'#047857'},energy:{500:'#f97316',600:'#ea580c'}}}}}</script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="flex min-h-screen bg-slate-50">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-white shrink-0 hidden md:block">
+      <div class="p-5 border-b border-slate-800">
+        <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center font-bold text-sm">M</div><div><div class="font-bold text-sm">Mahenoor Kirana</div><div class="text-xs text-slate-500">Admin Panel</div></div></div>
+      </div>
+      <nav class="p-4 space-y-1">
+        <a href="/admin/index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-brand-600/20 text-brand-300 font-medium text-sm">📊 Dashboard</a>
+        <a href="/admin/products.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 font-medium text-sm transition">📦 Products</a>
+        <a href="/admin/orders.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 font-medium text-sm transition">📋 Orders</a>
+        <hr class="border-slate-800 my-3">
+        <a href="/" target="_blank" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 font-medium text-sm transition">🏪 View Store</a>
+        <a href="#" id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-red-300 hover:bg-slate-800 font-medium text-sm transition">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Mobile Nav -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 flex">
+      <a href="/admin/index.html" class="flex-1 text-center py-3 text-xs font-medium text-brand-600 bg-brand-50">📊</a>
+      <a href="/admin/products.html" class="flex-1 text-center py-3 text-xs font-medium text-slate-500">📦</a>
+      <a href="/admin/orders.html" class="flex-1 text-center py-3 text-xs font-medium text-slate-500">📋</a>
+      <a href="/" target="_blank" class="flex-1 text-center py-3 text-xs font-medium text-slate-500">🏪</a>
+      <a href="#" id="logout-btn-mobile" class="flex-1 text-center py-3 text-xs font-medium text-slate-500">🚪</a>
+    </div>
+
+    <!-- Main -->
+    <main class="flex-1 p-4 md:p-8 pb-20 md:pb-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-2xl font-extrabold text-slate-800">Dashboard</h1>
+          <p class="text-sm text-slate-500" id="admin-greeting">Welcome back</p>
+        </div>
+        <div class="flex items-center gap-3"><span id="admin-name" class="text-sm font-medium text-slate-600 hidden md:inline"></span><div id="admin-avatar" class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm"></div></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8" id="stats-grid">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📦</div><div class="text-2xl font-extrabold text-slate-800" id="stat-products">-</div><div class="text-xs text-slate-500">Total Products</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📋</div><div class="text-2xl font-extrabold text-slate-800" id="stat-orders">-</div><div class="text-xs text-slate-500">Total Orders</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">👥</div><div class="text-2xl font-extrabold text-slate-800" id="stat-users">-</div><div class="text-xs text-slate-500">Customers</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">💰</div><div class="text-2xl font-extrabold text-brand-600" id="stat-revenue">-</div><div class="text-xs text-slate-500">Total Revenue</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">⏳</div><div class="text-2xl font-extrabold text-energy-600" id="stat-pending">-</div><div class="text-xs text-slate-500">Pending Orders</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">⚠️</div><div class="text-2xl font-extrabold text-red-600" id="stat-outofstock">-</div><div class="text-xs text-slate-500">Out of Stock</div></div>
+      </div>
+
+      <!-- Recent Orders -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-slate-800">Recent Orders</h3><a href="/admin/orders.html" class="text-sm text-brand-600 font-semibold hover:text-brand-700">View All →</a></div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-xs text-slate-500 uppercase tracking-wider"><th class="pb-3 pr-4">Order</th><th class="pb-3 pr-4">Customer</th><th class="pb-3 pr-4">Items</th><th class="pb-3 pr-4">Total</th><th class="pb-3 pr-4">Status</th><th class="pb-3">Date</th></tr></thead>
+            <tbody id="recent-orders-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
