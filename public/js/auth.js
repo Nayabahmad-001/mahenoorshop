@@ -10,9 +10,17 @@ function isAdmin() { const u = getUser(); return u && u.role === 'admin'; }
 function getSavedLocation() { try { return JSON.parse(localStorage.getItem('deliveryLocation')); } catch { return null; } }
 function saveLocation(loc) { localStorage.setItem('deliveryLocation', JSON.stringify(loc)); }
 
+function logoutUser(e) {
+  if (e) e.preventDefault();
+  clearAuth();
+  localStorage.removeItem('cart');
+  window.location.href = '/';
+}
+
 function updateNav() {
   const el = document.getElementById('nav-auth');
   const ordersEl = document.getElementById('nav-orders');
+  const logoutEl = document.getElementById('nav-logout');
   if (!el) return;
   if (isLoggedIn()) {
     const u = getUser();
@@ -20,6 +28,10 @@ function updateNav() {
     if (ordersEl) {
       ordersEl.classList.remove('hidden');
       ordersEl.style.display = '';
+    }
+    if (logoutEl) {
+      logoutEl.classList.remove('hidden');
+      logoutEl.style.display = '';
     }
     if (isAdmin()) {
       el.innerHTML = '<div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">' + nameLetter + '</span><span class="hidden md:inline text-sm font-medium">Dashboard</span></div>';
@@ -30,6 +42,7 @@ function updateNav() {
     }
   } else {
     if (ordersEl) ordersEl.classList.add('hidden');
+    if (logoutEl) logoutEl.classList.add('hidden');
     el.innerHTML = 'Login';
     el.href = '/pages/login.html';
   }
