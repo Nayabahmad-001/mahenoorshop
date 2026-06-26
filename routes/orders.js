@@ -9,7 +9,7 @@ const { protect } = require('../middleware/auth');
 const router = express.Router();
 
 const DELIVERY_CHARGE = 20;
-const FREE_DELIVERY_THRESHOLD = 500;
+const FREE_DELIVERY_THRESHOLD = 100;
 
 let razorpayInstance = null;
 function getRazorpay() {

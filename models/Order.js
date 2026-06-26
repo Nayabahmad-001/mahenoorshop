@@ -51,7 +51,10 @@ const orderSchema = new mongoose.Schema({
 
 orderSchema.pre('save', function (next) {
   if (this.isModified('status')) {
-    this.statusHistory.push({ status: this.status, timestamp: new Date() });
+    const last = this.statusHistory[this.statusHistory.length - 1];
+    if (!last || last.status !== this.status) {
+      this.statusHistory.push({ status: this.status, timestamp: new Date() });
+    }
   }
   next();
 });

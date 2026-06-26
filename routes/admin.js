@@ -66,11 +66,8 @@ router.put('/orders/:id/status', async (req, res) => {
   const order = await Order.findById(req.params.id);
   if (!order) return res.status(404).json({ message: 'Order not found' });
   if (order.status === status) return res.json({ order });
+  order.statusHistory.push({ status, timestamp: new Date(), note: note || '' });
   order.status = status;
-  if (note) {
-    const lastEntry = order.statusHistory[order.statusHistory.length - 1];
-    if (lastEntry) lastEntry.note = note;
-  }
   await order.save();
   res.json({ order });
 });
