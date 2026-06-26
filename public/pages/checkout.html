@@ -9,12 +9,13 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
   <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
       <a href="/" class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-sm">M</div><span class="font-extrabold text-lg">Mahenoor <span class="text-energy-600">Kirana</span></span></a>
-      <div class="flex items-center gap-4 text-sm font-medium"><a href="/" class="text-slate-600 hover:text-brand-600">Home</a><a id="nav-auth" href="/pages/login.html" class="text-slate-600 hover:text-brand-600">Login</a></div>
+      <div class="flex items-center gap-4 text-sm font-medium"><a href="/" class="text-slate-600 hover:text-brand-600">Home</a><a id="nav-orders" href="/pages/my-orders.html" class="text-slate-600 hover:text-brand-600 hidden">My Orders</a><a id="nav-auth" href="/pages/login.html" class="text-slate-600 hover:text-brand-600">Login</a></div>
     </div>
   </nav>
 
@@ -52,9 +53,23 @@
               <input type="hidden" id="lng" value="">
             </div>
 
-            <button type="submit" class="w-full bg-energy-500 hover:bg-energy-600 text-white font-bold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2 mt-2">
+            <div class="border-t border-slate-100 pt-4 mt-2">
+              <h3 class="text-sm font-bold text-slate-700 mb-3">💳 Payment Method</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-brand-200 bg-brand-50/30 cursor-pointer hover:border-brand-400 transition has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50">
+                  <input type="radio" name="paymentMethod" value="cod" checked class="w-4 h-4 text-brand-600 accent-brand-600">
+                  <div><p class="font-semibold text-sm text-slate-800">Cash on Delivery</p><p class="text-xs text-slate-400">Pay when you receive</p></div>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-brand-400 transition has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50">
+                  <input type="radio" name="paymentMethod" value="razorpay" class="w-4 h-4 text-brand-600 accent-brand-600">
+                  <div><p class="font-semibold text-sm text-slate-800">Online Payment</p><p class="text-xs text-slate-400">Pay via UPI, Card, NetBanking</p></div>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" id="place-order-btn" class="w-full bg-energy-500 hover:bg-energy-600 text-white font-bold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2 mt-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              Place Order (Cash on Delivery)
+              <span id="btn-text">Place Order (Cash on Delivery)</span>
             </button>
           </form>
         </div>
@@ -71,7 +86,7 @@
             <div class="flex justify-between text-sm" id="delivery-charge-row"><span class="text-slate-500">Delivery Charge</span><span id="checkout-delivery" class="text-brand-600 font-semibold">₹0</span></div>
             <div class="flex justify-between text-lg font-extrabold border-t border-slate-200 pt-2 mt-2"><span>Total</span><span id="checkout-total" class="text-brand-700">₹0</span></div>
           </div>
-          <div class="mt-4 p-3 bg-brand-50 rounded-xl text-xs text-brand-700 flex items-start gap-2">
+          <div id="payment-info" class="mt-4 p-3 bg-brand-50 rounded-xl text-xs text-brand-700 flex items-start gap-2">
             <span>💵</span><span>Pay with <strong>Cash on Delivery</strong> when your order arrives.</span>
           </div>
         </div>
@@ -141,26 +156,55 @@
 
     function detectLocation() {
       const status = document.getElementById('map-status');
-      if (!navigator.geolocation) {
-        status.textContent = 'Geolocation not supported by your browser.';
-        status.className = 'text-xs text-red-500 mt-2';
-        return;
-      }
       status.textContent = 'Detecting your location...';
       status.className = 'text-xs text-slate-400 mt-2';
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          initMap(latitude, longitude);
-          placeMarker(latitude, longitude);
-          reverseGeocode(latitude, longitude);
-        },
-        () => {
-          status.textContent = 'Could not detect location. Tap on the map to set it.';
+      initMap();
+
+      function onLocation(lat, lng) {
+        initMap(lat, lng);
+        placeMarker(lat, lng);
+        reverseGeocode(lat, lng);
+      }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => onLocation(pos.coords.latitude, pos.coords.longitude),
+          () => {
+            status.textContent = 'Trying IP-based location...';
+            status.className = 'text-xs text-slate-400 mt-2';
+            fetch('https://ipapi.co/json/').then(r => r.json()).then(d => {
+              if (d && d.latitude && d.longitude) {
+                onLocation(parseFloat(d.latitude), parseFloat(d.longitude));
+              } else {
+                throw new Error('No IP location data');
+              }
+            }).catch(() => {
+              fetch('https://ip-api.com/json/').then(r => r.json()).then(d => {
+                if (d && d.lat && d.lon) {
+                  onLocation(parseFloat(d.lat), parseFloat(d.lon));
+                } else {
+                  throw new Error('No IP location data');
+                }
+              }).catch(() => {
+                status.textContent = 'Could not detect location. Tap on the map to set it manually.';
+                status.className = 'text-xs text-amber-500 mt-2';
+              });
+            });
+          },
+          { enableHighAccuracy: false, timeout: 15000 }
+        );
+      } else {
+        status.textContent = 'Trying IP-based location...';
+        status.className = 'text-xs text-slate-400 mt-2';
+        fetch('https://ipapi.co/json/').then(r => r.json()).then(d => {
+          if (d && d.latitude && d.longitude) {
+            onLocation(parseFloat(d.latitude), parseFloat(d.longitude));
+          }
+        }).catch(() => {
+          status.textContent = 'Could not detect location. Tap on the map to set it manually.';
           status.className = 'text-xs text-amber-500 mt-2';
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
+        });
+      }
     }
 
     function prefillLocation() {
@@ -171,7 +215,114 @@
           if (loc.state) document.getElementById('state').value = loc.state;
           if (loc.pincode) document.getElementById('pincode').value = loc.pincode;
         }
+        const user = getUser();
+        if (user && user.address) {
+          if (user.address.street && !document.getElementById('street').value) document.getElementById('street').value = user.address.street;
+          if (user.address.city && !document.getElementById('city').value) document.getElementById('city').value = user.address.city;
+          if (user.address.state && !document.getElementById('state').value) document.getElementById('state').value = user.address.state;
+          if (user.address.pincode && !document.getElementById('pincode').value) document.getElementById('pincode').value = user.address.pincode;
+        }
+        if (user && user.phone && !document.getElementById('phone').value) document.getElementById('phone').value = user.phone;
       } catch {}
+    }
+
+    function updatePaymentUI(method) {
+      const btnText = document.getElementById('btn-text');
+      const paymentInfo = document.getElementById('payment-info');
+      if (method === 'razorpay') {
+        btnText.textContent = 'Pay Online & Place Order';
+        paymentInfo.innerHTML = '<span>💳</span><span>Pay via <strong>UPI, Card, or NetBanking</strong> securely through Razorpay.</span>';
+      } else {
+        btnText.textContent = 'Place Order (Cash on Delivery)';
+        paymentInfo.innerHTML = '<span>💵</span><span>Pay with <strong>Cash on Delivery</strong> when your order arrives.</span>';
+      }
+    }
+
+    function getCartItems() {
+      return getCart().map(i => ({ product: i.product, quantity: i.quantity }));
+    }
+
+    async function handleRazorpayPayment(formData) {
+      const alert = document.getElementById('alert');
+      const btn = document.getElementById('place-order-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Initiating Payment...';
+
+      try {
+        const initRes = await apiCall('/orders/razorpay/init', {
+          method: 'POST',
+          body: JSON.stringify({
+            items: getCartItems(),
+            phone: formData.phone,
+            shippingAddress: formData.shippingAddress,
+            deliveryLocation: formData.deliveryLocation
+          })
+        });
+
+        const options = {
+          key: initRes.key,
+          amount: initRes.amount,
+          currency: initRes.currency,
+          name: 'Mahenoor Kirana Store',
+          description: 'Grocery Order',
+          order_id: initRes.razorpayOrderId,
+          prefill: {
+            name: getUser()?.name || '',
+            email: getUser()?.email || '',
+            contact: formData.phone
+          },
+          theme: { color: '#059669' },
+          handler: async function (response) {
+            btn.innerHTML = '<span class="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Verifying Payment...';
+            try {
+              await apiCall('/orders/razorpay/verify', {
+                method: 'POST',
+                body: JSON.stringify({
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                  items: getCartItems(),
+                  phone: formData.phone,
+                  shippingAddress: formData.shippingAddress,
+                  deliveryLocation: formData.deliveryLocation
+                })
+              });
+              localStorage.removeItem('cart');
+              updateCartCount();
+              alert.className = 'block p-4 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200';
+              alert.textContent = '🎉 Payment successful! Order placed. Redirecting...';
+              setTimeout(() => window.location.href = '/pages/my-orders.html', 1500);
+            } catch (err) {
+              btn.disabled = false;
+              btn.innerHTML = '<span id="btn-text">Pay Online & Place Order</span>';
+              alert.className = 'block p-4 rounded-xl text-sm font-medium bg-red-50 text-red-600 border border-red-200';
+              alert.textContent = 'Payment verification failed: ' + err.message;
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              btn.disabled = false;
+              btn.innerHTML = '<span id="btn-text">Pay Online & Place Order</span>';
+              alert.className = 'block p-4 rounded-xl text-sm font-medium bg-amber-50 text-amber-600 border border-amber-200';
+              alert.textContent = 'Payment cancelled. You can try again or choose Cash on Delivery.';
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+          btn.disabled = false;
+          btn.innerHTML = '<span id="btn-text">Pay Online & Place Order</span>';
+          alert.className = 'block p-4 rounded-xl text-sm font-medium bg-red-50 text-red-600 border border-red-200';
+          alert.textContent = 'Payment failed: ' + (response.error?.description || 'Please try again');
+        });
+        rzp.open();
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = '<span id="btn-text">Pay Online & Place Order</span>';
+        alert.className = 'block p-4 rounded-xl text-sm font-medium bg-red-50 text-red-600 border border-red-200';
+        alert.textContent = err.message;
+      }
     }
 
     async function loadCheckout() {
@@ -210,18 +361,49 @@
 
         initMap();
 
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(el => {
+          el.addEventListener('change', function () {
+            updatePaymentUI(this.value);
+          });
+        });
+
         document.getElementById('checkout-form').addEventListener('submit', async (e) => {
           e.preventDefault();
           if (!isLoggedIn()) { window.location.href = '/pages/login.html'; return; }
           const alert = document.getElementById('alert');
+          const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+          const lat = document.getElementById('lat').value;
+          const lng = document.getElementById('lng').value;
+          const deliveryLocation = lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null;
+          const formData = {
+            phone: document.getElementById('phone').value,
+            shippingAddress: {
+              street: document.getElementById('street').value,
+              city: document.getElementById('city').value,
+              state: document.getElementById('state').value,
+              pincode: document.getElementById('pincode').value
+            },
+            deliveryLocation
+          };
+
+          if (paymentMethod === 'razorpay') {
+            await handleRazorpayPayment(formData);
+            return;
+          }
+
           const btn = e.target.querySelector('button[type="submit"]');
           btn.disabled = true;
           btn.innerHTML = '<span class="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Placing Order...';
           try {
-            const lat = document.getElementById('lat').value;
-            const lng = document.getElementById('lng').value;
-            const deliveryLocation = lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null;
-            await apiCall('/orders', { method: 'POST', body: JSON.stringify({ items: cart, phone: document.getElementById('phone').value, shippingAddress: { street: document.getElementById('street').value, city: document.getElementById('city').value, state: document.getElementById('state').value, pincode: document.getElementById('pincode').value }, deliveryLocation }) });
+            await apiCall('/orders', {
+              method: 'POST',
+              body: JSON.stringify({
+                items: getCartItems(),
+                phone: formData.phone,
+                shippingAddress: formData.shippingAddress,
+                deliveryLocation: formData.deliveryLocation
+              })
+            });
             localStorage.removeItem('cart');
             updateCartCount();
             alert.className = 'block p-4 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200';
@@ -229,7 +411,7 @@
             setTimeout(() => window.location.href = '/pages/my-orders.html', 1500);
           } catch (err) {
             btn.disabled = false;
-            btn.innerHTML = 'Place Order (Cash on Delivery)';
+            btn.innerHTML = '<span id="btn-text">Place Order (Cash on Delivery)</span>';
             alert.className = 'block p-4 rounded-xl text-sm font-medium bg-red-50 text-red-600 border border-red-200';
             alert.textContent = err.message;
           }

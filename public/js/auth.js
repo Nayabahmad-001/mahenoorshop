@@ -12,14 +12,24 @@ function saveLocation(loc) { localStorage.setItem('deliveryLocation', JSON.strin
 
 function updateNav() {
   const el = document.getElementById('nav-auth');
+  const ordersEl = document.getElementById('nav-orders');
   if (!el) return;
   if (isLoggedIn()) {
     const u = getUser();
-    el.innerHTML = isAdmin()
-      ? '<div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">' + u.name.charAt(0).toUpperCase() + '</span><span class="hidden md:inline text-sm font-medium">Dashboard</span></div>'
-      : '<div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">' + u.name.charAt(0).toUpperCase() + '</span><span class="hidden md:inline text-sm font-medium">Profile</span></div>';
-    el.href = isAdmin() ? '/admin/index.html' : '/pages/profile.html';
+    const nameLetter = u.name.charAt(0).toUpperCase();
+    if (ordersEl) {
+      ordersEl.classList.remove('hidden');
+      ordersEl.style.display = '';
+    }
+    if (isAdmin()) {
+      el.innerHTML = '<div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">' + nameLetter + '</span><span class="hidden md:inline text-sm font-medium">Dashboard</span></div>';
+      el.href = '/admin/index.html';
+    } else {
+      el.innerHTML = '<div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">' + nameLetter + '</span><span class="hidden md:inline text-sm font-medium">Profile</span></div>';
+      el.href = '/pages/profile.html';
+    }
   } else {
+    if (ordersEl) ordersEl.classList.add('hidden');
     el.innerHTML = 'Login';
     el.href = '/pages/login.html';
   }

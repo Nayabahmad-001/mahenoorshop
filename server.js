@@ -13,6 +13,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
+const feedbackRoutes = require('./routes/feedback');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
@@ -26,6 +27,7 @@ app.use(express.static(publicPath));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/feedback', feedbackRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));

@@ -51,6 +51,9 @@
                 <div class="flex gap-2 mb-3">
                   <input type="text" id="location-pincode" placeholder="Enter pincode" maxlength="6" class="flex-1 px-3 py-2 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
                   <button onclick="checkPincode()" class="px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition">Check</button>
+                  <button onclick="detectLocationPincode()" title="Use my current location" class="px-3 py-2 bg-slate-100 text-slate-600 text-sm font-semibold rounded-xl hover:bg-brand-100 hover:text-brand-700 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  </button>
                 </div>
                 <div id="location-result" class="hidden text-xs mb-2"></div>
                 <p class="text-xs text-slate-400 mb-2">Or select a popular area:</p>
@@ -62,6 +65,7 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
             <span id="cart-count" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-energy-500 text-white text-xs font-bold flex items-center justify-center">0</span>
           </button>
+          <a id="nav-orders" href="/pages/my-orders.html" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition hidden">My Orders</a>
           <a id="nav-auth" href="/pages/login.html" class="text-sm font-semibold text-slate-700 hover:text-brand-600 transition">Login</a>
         </div>
       </div>
@@ -71,6 +75,9 @@
           <input type="text" id="mobile-pincode" placeholder="Enter pincode for delivery" maxlength="6" class="w-full pl-9 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
         <button onclick="checkMobilePincode()" class="px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition whitespace-nowrap">Check</button>
+        <button onclick="detectLocationPincode()" title="Use my current location" class="px-3 py-2 bg-slate-200 text-slate-600 rounded-xl hover:bg-brand-100 hover:text-brand-700 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
       </div>
       <div class="md:hidden pb-3">
         <div class="relative">
@@ -159,9 +166,9 @@
         <div>
           <h4 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-400">Contact</h4>
           <ul class="space-y-2 text-sm text-slate-300">
-            <li class="flex items-center gap-2">📞 +91 98765 43210</li>
-            <li class="flex items-center gap-2">✉️ hello@mahenoorkirana.com</li>
-            <li class="flex items-center gap-2">📍 Shop No. 7, Main Bazaar, India</li>
+            <li class="flex items-center gap-2">📞 <a href="tel:9708637428" class="hover:text-white transition">9708637428</a> / <a href="tel:9341782080" class="hover:text-white transition">9341782080</a></li>
+            <li class="flex items-center gap-2">✉️ <a href="mailto:mahenoor8431@gmail.com" class="hover:text-white transition">mahenoor8431@gmail.com</a></li>
+            <li class="flex items-center gap-2">📍 Khanpur Berain, Near Gulaab Aganbari, 3 No. Ward</li>
           </ul>
         </div>
       </div>

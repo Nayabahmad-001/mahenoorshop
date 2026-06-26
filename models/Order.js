@@ -40,8 +40,13 @@ const orderSchema = new mongoose.Schema({
     default: 'pending'
   },
   statusHistory: [statusHistorySchema],
-  paymentMethod: { type: String, enum: ['cod'], default: 'cod' },
-  paymentStatus: { type: String, enum: ['pending', 'paid', 'refunded'], default: 'pending' }
+  paymentMethod: { type: String, enum: ['cod', 'razorpay'], default: 'cod' },
+  paymentStatus: { type: String, enum: ['pending', 'paid', 'refunded'], default: 'pending' },
+  razorpayDetails: {
+    orderId: String,
+    paymentId: String,
+    signature: String
+  }
 }, { timestamps: true });
 
 orderSchema.pre('save', function (next) {

@@ -269,135 +269,27 @@ function goToPage(page) {
   window.scrollTo({ top: document.getElementById('products')?.offsetTop - 80, behavior: 'smooth' });
 }
 
-const SERVICEABLE_AREAS = [
-  { pincode: '110001', area: 'Connaught Place', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110002', area: 'Chandni Chowk', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110003', area: 'Karol Bagh', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110005', area: 'Lajpat Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110006', area: 'Kashmiri Gate', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110007', area: 'Shakti Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110008', area: 'Sadar Bazaar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110009', area: 'Model Town', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110015', area: 'Pusa Road', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110016', area: 'Hauz Khas', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110017', area: 'Malviya Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110018', area: 'Janakpuri', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110019', area: 'Green Park', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110020', area: 'Saket', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110022', area: 'RK Puram', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110023', area: 'Jangpura', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110024', area: 'Kalkaji', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110025', area: 'Sarita Vihar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110026', area: 'Munirka', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110027', area: 'Vasant Kunj', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110028', area: 'Dwarka', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110030', area: 'Sangam Vihar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110031', area: 'Greater Kailash', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110032', area: 'Patel Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110033', area: 'Pitampura', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110034', area: 'Rohini', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110035', area: 'Shahdara', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110036', area: 'Uttam Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110037', area: 'Nangloi', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110038', area: 'Najafgarh', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110039', area: 'Kapashera', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110040', area: 'Vasant Vihar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110041', area: 'Mehrauli', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110042', area: 'Tughlakabad', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110043', area: 'Badarpur', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110044', area: 'Jaitpur', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110045', area: 'Molarband', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110046', area: 'Dabri', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110047', area: 'Madanpur Khadar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110048', area: 'Saidulajab', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110049', area: 'Sultanpuri', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110050', area: 'Mangolpuri', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110051', area: 'Kirti Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110052', area: 'New Friends Colony', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110053', area: 'Moti Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110054', area: 'Rajendra Place', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110055', area: 'Savitri Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110056', area: 'Tilak Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110057', area: 'Vishnu Garden', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110058', area: 'Rajouri Garden', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110059', area: 'Tagore Garden', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110060', area: 'Subhash Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110061', area: 'Shanti Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110062', area: 'Hari Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110063', area: 'Ramesh Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110064', area: 'Bhera Enclave', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110065', area: 'Khirki Extension', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110066', area: 'Palam', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110067', area: 'Mahabir Enclave', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110068', area: 'Hastsal', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110070', area: 'Narela', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110071', area: 'Bhalswa', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110072', area: 'Budh Vihar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110073', area: 'Karawal Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110074', area: 'Mukherjee Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110075', area: 'Paschim Vihar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110076', area: 'Hari Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110077', area: 'Jwalaheri', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110078', area: 'Vikaspuri', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110079', area: 'Mahavir Enclave', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110080', area: 'Dwarka Sector 1-29', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110081', area: 'Dwarka Sector 12-22', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110082', area: 'Dwarka Sector 23-29', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110083', area: 'Paprawat', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110084', area: 'Roshanpura', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110085', area: 'Baprola', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110086', area: 'Kanhaiya Nagar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110087', area: 'Shalimar Bagh', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110088', area: 'Punjabi Bagh', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110089', area: 'Ashok Vihar', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110090', area: 'Wazirpur', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110091', area: 'Mayur Vihar Ph 1', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110092', area: 'Mayur Vihar Ph 2', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110093', area: 'Kondli', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110094', area: 'Dallupura', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110095', area: 'Gazipur', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110096', area: 'Gharoli', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110098', area: 'Khajuri Khas', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '110099', area: 'Chilla Saroda', city: 'New Delhi', state: 'Delhi' },
-  { pincode: '201001', area: 'Indirapuram', city: 'Ghaziabad', state: 'Uttar Pradesh' },
-  { pincode: '201002', area: 'Vaishali', city: 'Ghaziabad', state: 'Uttar Pradesh' },
-  { pincode: '201003', area: 'Kaushambi', city: 'Ghaziabad', state: 'Uttar Pradesh' },
-  { pincode: '201005', area: 'Vasundhara', city: 'Ghaziabad', state: 'Uttar Pradesh' },
-  { pincode: '201012', area: 'Crossings Republik', city: 'Ghaziabad', state: 'Uttar Pradesh' },
-  { pincode: '201014', area: 'Raj Nagar Extension', city: 'Ghaziabad', state: 'Uttar Pradesh' },
-  { pincode: '201301', area: 'Sector 62 Noida', city: 'Noida', state: 'Uttar Pradesh' },
-  { pincode: '201303', area: 'Sector 24 Noida', city: 'Noida', state: 'Uttar Pradesh' },
-  { pincode: '201304', area: 'Sector 63 Noida', city: 'Noida', state: 'Uttar Pradesh' },
-  { pincode: '201305', area: 'Sector 73 Noida', city: 'Noida', state: 'Uttar Pradesh' },
-  { pincode: '201306', area: 'Sector 74 Noida', city: 'Noida', state: 'Uttar Pradesh' },
-  { pincode: '201307', area: 'Sector 71 Noida', city: 'Noida', state: 'Uttar Pradesh' },
-  { pincode: '201308', area: 'Sector 72 Noida', city: 'Noida', state: 'Uttar Pradesh' },
-  { pincode: '201310', area: 'Greater Noida West', city: 'Greater Noida', state: 'Uttar Pradesh' },
-  { pincode: '201318', area: 'Sector 143 Noida', city: 'Noida', state: 'Uttar Pradesh' },
-  { pincode: '121001', area: 'Sector 13 Faridabad', city: 'Faridabad', state: 'Haryana' },
-  { pincode: '121002', area: 'Sector 16 Faridabad', city: 'Faridabad', state: 'Haryana' },
-  { pincode: '121003', area: 'Sector 17 Faridabad', city: 'Faridabad', state: 'Haryana' },
-  { pincode: '121004', area: 'Sector 31 Faridabad', city: 'Faridabad', state: 'Haryana' },
-  { pincode: '121005', area: 'Old Faridabad', city: 'Faridabad', state: 'Haryana' },
-  { pincode: '121006', area: 'Nehru Ground Faridabad', city: 'Faridabad', state: 'Haryana' },
-  { pincode: '122001', area: 'Sector 14 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122002', area: 'Sector 36 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122003', area: 'Sector 38 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122004', area: 'Sector 39 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122005', area: 'Sector 56 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122006', area: 'DLF Ph 2 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122007', area: 'Sushant Lok Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122008', area: 'Sector 14 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122009', area: 'Sector 15 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122010', area: 'Sector 10 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122011', area: 'Sector 12 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122015', area: 'Sector 65 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122016', area: 'Sector 81 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122017', area: 'Sector 85 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122018', area: 'Sector 99 Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122051', area: 'Sohna Road Gurgaon', city: 'Gurgaon', state: 'Haryana' },
-  { pincode: '122052', area: 'Badshahpur', city: 'Gurgaon', state: 'Haryana' },
-];
+const SERVICEABLE_AREAS = [];
+
+let pincodeLookupCache = {};
+
+async function lookupPincode(pincode) {
+  if (pincodeLookupCache[pincode]) return pincodeLookupCache[pincode];
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${pincode}&countrycodes=IN&limit=1`);
+    const data = await res.json();
+    if (data && data[0]) {
+      const parts = data[0].displayname.split(', ');
+      const state = parts[parts.length - 1] || '';
+      const city = parts[parts.length - 3] || parts[parts.length - 2] || '';
+      const area = parts[0] || '';
+      const result = { pincode, area, city: city.replace(/^District\s/i, ''), state };
+      pincodeLookupCache[pincode] = result;
+      return result;
+    }
+  } catch {}
+  return null;
+}
 
 function toggleLocation() {
   const dd = document.getElementById('location-dropdown');
@@ -407,19 +299,10 @@ function toggleLocation() {
 function renderPopularAreas() {
   const container = document.getElementById('popular-areas');
   if (!container) return;
-  const unique = {};
-  const areas = SERVICEABLE_AREAS.filter(a => {
-    const key = `${a.city}-${a.area}`;
-    if (unique[key]) return false;
-    unique[key] = true;
-    return true;
-  }).slice(0, 40);
-  container.innerHTML = areas.map(a =>
-    `<button onclick="selectArea('${a.pincode}','${a.area}','${a.city}','${a.state}')" class="text-left px-3 py-1.5 rounded-lg hover:bg-brand-50 text-xs text-slate-600 hover:text-brand-700 transition truncate">${a.area}, ${a.city}</button>`
-  ).join('');
+  container.innerHTML = '<p class="text-xs text-slate-400 col-span-2">Enter your pincode above to check delivery availability</p>';
 }
 
-function selectArea(pincode, area, city, state) {
+async function selectArea(pincode, area, city, state) {
   const loc = { pincode, area, city, state };
   saveLocation(loc);
   updateLocationDisplay(loc);
@@ -427,7 +310,7 @@ function selectArea(pincode, area, city, state) {
   showToast(`✅ Delivery available to ${area}, ${city}`);
 }
 
-function checkPincode() {
+async function checkPincode() {
   const input = document.getElementById('location-pincode');
   const result = document.getElementById('location-result');
   const pincode = input.value.trim();
@@ -437,29 +320,92 @@ function checkPincode() {
     result.classList.remove('hidden');
     return;
   }
-  const match = SERVICEABLE_AREAS.find(a => a.pincode === pincode);
-  if (match) {
+  result.className = 'text-xs mb-2 text-slate-400 font-medium';
+  result.textContent = 'Checking...';
+  result.classList.remove('hidden');
+  const loc = await lookupPincode(pincode);
+  if (loc) {
     result.className = 'text-xs mb-2 text-emerald-600 font-medium';
-    result.textContent = `✅ Delivery available to ${match.area}, ${match.city}`;
-    result.classList.remove('hidden');
-    selectArea(match.pincode, match.area, match.city, match.state);
+    result.textContent = `✅ Delivery available to ${loc.area || loc.city}`;
+    selectArea(loc.pincode, loc.area || loc.city, loc.city, loc.state);
   } else {
-    result.className = 'text-xs mb-2 text-red-500 font-medium';
-    result.textContent = '❌ Sorry, delivery not available in this area yet';
-    result.classList.remove('hidden');
+    result.className = 'text-xs mb-2 text-amber-600 font-medium';
+    result.textContent = '✅ Pincode accepted! Please fill your address details.';
+    selectArea(pincode, '', '', '');
   }
 }
 
-function checkMobilePincode() {
+async function detectLocationViaIP() {
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const data = await res.json();
+    if (data && data.postal) {
+      return { pincode: data.postal, city: data.city || '', region: data.region || '' };
+    }
+  } catch {}
+  try {
+    const res = await fetch('https://ip-api.com/json/');
+    const data = await res.json();
+    if (data && data.zip) {
+      return { pincode: data.zip, city: data.city || '', region: data.regionName || '' };
+    }
+  } catch {}
+  return null;
+}
+
+function detectLocationPincode() {
+  const result = document.getElementById('location-result');
+  if (result) { result.className = 'text-xs mb-2 text-slate-400 font-medium'; result.textContent = 'Detecting location...'; result.classList.remove('hidden'); }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&addressdetails=1`);
+          const data = await res.json();
+          const addr = data?.address;
+          if (addr) {
+            const pincode = addr.postcode || '';
+            if (pincode && pincode.length === 6) {
+              document.getElementById('location-pincode').value = pincode;
+              checkPincode();
+              return;
+            }
+          }
+        } catch {}
+        fallbackIPLocation(result);
+      },
+      () => fallbackIPLocation(result),
+      { enableHighAccuracy: false, timeout: 15000 }
+    );
+  } else {
+    fallbackIPLocation(result);
+  }
+}
+
+async function fallbackIPLocation(result) {
+  if (result) result.textContent = 'Trying IP-based location...';
+  const ipLoc = await detectLocationViaIP();
+  if (ipLoc && ipLoc.pincode && ipLoc.pincode.length === 6) {
+    document.getElementById('location-pincode').value = ipLoc.pincode;
+    if (result) { result.className = 'text-xs mb-2 text-emerald-600 font-medium'; result.textContent = `✅ Detected: ${ipLoc.city}, ${ipLoc.region} - ${ipLoc.pincode}`; }
+    checkPincode();
+  } else {
+    if (result) { result.className = 'text-xs mb-2 text-amber-500 font-medium'; result.textContent = 'Could not detect location. Please enter pincode manually.'; }
+  }
+}
+
+async function checkMobilePincode() {
   const input = document.getElementById('mobile-pincode');
   const pincode = input ? input.value.trim() : '';
   if (pincode.length !== 6) { showToast('Please enter a 6-digit pincode', true); return; }
-  const match = SERVICEABLE_AREAS.find(a => a.pincode === pincode);
-  if (match) {
-    selectArea(match.pincode, match.area, match.city, match.state);
-    showToast(`✅ Delivery available to ${match.area}, ${match.city}`);
+  const loc = await lookupPincode(pincode);
+  if (loc) {
+    selectArea(loc.pincode, loc.area || loc.city, loc.city, loc.state);
+    showToast(`✅ Delivery available to ${loc.area || loc.city}`);
   } else {
-    showToast('❌ Delivery not available in this area yet', true);
+    selectArea(pincode, '', '', '');
+    showToast('✅ Pincode accepted!');
   }
 }
 
