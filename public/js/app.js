@@ -95,9 +95,9 @@ async function renderCartDrawer() {
             </div>
           </div>
           <div class="flex items-center gap-1">
-            <button onclick="updateQty('${item.product}', -1)" class="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-600 hover:bg-brand-50 hover:border-brand-300 transition">−</button>
-            <span class="w-7 text-center font-bold text-sm">${item.quantity}</span>
-            <button onclick="updateQty('${item.product}', 1)" class="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-600 hover:bg-brand-50 hover:border-brand-300 transition">+</button>
+            <button onclick="updateQty('${item.product}', -1)" class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-lg font-bold text-slate-600 hover:bg-brand-50 hover:border-brand-300 transition">−</button>
+            <span class="w-8 text-center font-bold text-sm">${item.quantity}</span>
+            <button onclick="updateQty('${item.product}', 1)" class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-lg font-bold text-slate-600 hover:bg-brand-50 hover:border-brand-300 transition">+</button>
           </div>
         </div>
       `;
@@ -203,9 +203,9 @@ function renderProducts(products) {
           </div>
           ${inStock ? `
           <div class="mt-auto mt-3 flex items-center gap-1">
-            <button onclick="qtyBtn('${p._id}', -1)" class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-lg font-bold text-slate-600 hover:bg-brand-50 hover:border-brand-300 transition">−</button>
+            <button onclick="qtyBtn('${p._id}', -1)" class="w-11 h-11 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-xl font-bold text-slate-600 hover:bg-brand-50 hover:border-brand-300 transition">−</button>
             <span id="qty-${p._id}" class="flex-1 text-center font-bold text-sm text-slate-800">${qty}</span>
-            <button onclick="qtyBtn('${p._id}', 1)" class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-lg font-bold text-slate-600 hover:bg-brand-50 hover:border-brand-300 transition">+</button>
+            <button onclick="qtyBtn('${p._id}', 1)" class="w-11 h-11 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-xl font-bold text-slate-600 hover:bg-brand-50 hover:border-brand-300 transition">+</button>
           </div>
           ` : `
           <button disabled class="mt-auto w-full mt-3 bg-slate-300 cursor-not-allowed text-white font-semibold text-sm py-2.5 rounded-xl">Sold Out</button>
@@ -253,10 +253,14 @@ function renderPagination() {
   el.innerHTML = `<div class="flex items-center justify-center gap-2 mt-8">
     <button onclick="goToPage(${currentPage - 1})" class="px-4 py-2 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-600 hover:border-brand-300 hover:text-brand-700 transition ${currentPage <= 1 ? 'opacity-40 pointer-events-none' : ''}">← Prev</button>
     ${Array.from({ length: totalPages }, (_, i) => i + 1).map(p =>
-      `<button onclick="goToPage(${p})" class="w-10 h-10 rounded-xl text-sm font-bold transition ${p === currentPage ? 'bg-brand-600 text-white' : 'border-2 border-slate-200 text-slate-600 hover:border-brand-300 hover:text-brand-700'}">${p}</button>`
+      `<button onclick="goToPage(${p})" class="w-11 h-11 rounded-xl text-sm font-bold transition ${p === currentPage ? 'bg-brand-600 text-white' : 'border-2 border-slate-200 text-slate-600 hover:border-brand-300 hover:text-brand-700'}">${p}</button>`
     ).join('')}
     <button onclick="goToPage(${currentPage + 1})" class="px-4 py-2 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-600 hover:border-brand-300 hover:text-brand-700 transition ${currentPage >= totalPages ? 'opacity-40 pointer-events-none' : ''}">Next →</button>
   </div>`;
+}
+
+function getSortValue() {
+  return document.getElementById('sort-select')?.value || document.getElementById('sort-select-mobile')?.value || '';
 }
 
 function goToPage(page) {
@@ -264,7 +268,7 @@ function goToPage(page) {
   const activeTab = document.querySelector('.category-tab.active');
   const cat = activeTab ? activeTab.dataset.category : 'all';
   const search = document.getElementById('search-input')?.value || '';
-  const sort = document.getElementById('sort-select')?.value || '';
+  const sort = getSortValue();
   loadProducts(cat, search, sort, page);
   window.scrollTo({ top: document.getElementById('products')?.offsetTop - 80, behavior: 'smooth' });
 }
@@ -471,10 +475,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  sortSelect.addEventListener('change', () => {
-    currentSort = sortSelect.value;
+  const sortSelectMobile = document.getElementById('sort-select-mobile');
+
+  function onSortChange(e) {
+    currentSort = e.target.value;
+    if (sortSelect && sortSelect !== e.target) sortSelect.value = currentSort;
+    if (sortSelectMobile && sortSelectMobile !== e.target) sortSelectMobile.value = currentSort;
     filterProducts();
-  });
+  }
+
+  sortSelect.addEventListener('change', onSortChange);
+  if (sortSelectMobile) sortSelectMobile.addEventListener('change', onSortChange);
 
   function handleSearch(val) {
     clearTimeout(searchTimeout);

@@ -124,6 +124,11 @@ html { scroll-behavior: smooth; }
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   z-index: 9999;
   animation: slideUp 0.3s ease;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 640px) {
