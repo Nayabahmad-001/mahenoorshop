@@ -104,7 +104,7 @@ async function renderCartDrawer() {
     }).join('');
 
     const savings = totalMrp - subtotal;
-    const deliveryCharge = subtotal <= 500 ? 20 : 0;
+    const deliveryCharge = subtotal <= 100 ? 20 : 0;
     const grandTotal = subtotal + deliveryCharge;
     footer.innerHTML = `
       <div class="space-y-2 mb-4">
