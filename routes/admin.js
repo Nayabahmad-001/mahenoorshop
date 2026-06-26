@@ -80,4 +80,27 @@ router.get('/users', async (req, res) => {
   res.json({ users });
 });
 
+router.get('/users/stats', async (req, res) => {
+  const stats = await Order.aggregate([
+    { $group: { _id: '$user', totalOrders: { $sum: 1 }, totalSpent: { $sum: { $ifNull: ['$total', '$subtotal'] } } } },
+    { $sort: { totalOrders: -1 } }
+  ]);
+  const users = await User.find({ role: 'user' }).lean();
+  const userMap = {};
+  users.forEach(u => { userMap[u._id.toString()] = u; });
+  const result = stats.map(s => ({
+    _id: s._id,
+    name: userMap[s._id.toString()]?.name || 'Unknown',
+    email: userMap[s._id.toString()]?.email || '',
+    phone: userMap[s._id.toString()]?.phone || '',
+    totalOrders: s.totalOrders,
+    totalSpent: s.totalSpent
+  }));
+  const noOrderUsers = users.filter(u => !stats.find(s => s._id.toString() === u._id.toString()));
+  noOrderUsers.forEach(u => {
+    result.push({ _id: u._id, name: u.name, email: u.email, phone: u.phone, totalOrders: 0, totalSpent: 0 });
+  });
+  res.json({ users: result });
+});
+
 module.exports = router;

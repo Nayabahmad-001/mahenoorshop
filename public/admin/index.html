@@ -55,12 +55,23 @@
       </div>
 
       <!-- Recent Orders -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-slate-800">Recent Orders</h3><a href="/admin/orders.html" class="text-sm text-brand-600 font-semibold hover:text-brand-700">View All →</a></div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead><tr class="text-left text-xs text-slate-500 uppercase tracking-wider"><th class="pb-3 pr-4">Order</th><th class="pb-3 pr-4">Customer</th><th class="pb-3 pr-4">Items</th><th class="pb-3 pr-4">Total</th><th class="pb-3 pr-4">Status</th><th class="pb-3">Date</th></tr></thead>
             <tbody id="recent-orders-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- User Order History -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-slate-800">👥 Customer Order History</h3><span class="text-xs text-slate-400">Total orders per customer</span></div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-xs text-slate-500 uppercase tracking-wider"><th class="pb-3 pr-4">Customer</th><th class="pb-3 pr-4">Email</th><th class="pb-3 pr-4">Phone</th><th class="pb-3 pr-4">Total Orders</th><th class="pb-3">Total Spent</th></tr></thead>
+            <tbody id="user-stats-body" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>

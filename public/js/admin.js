@@ -50,6 +50,22 @@ async function loadDashboard() {
       return `<tr><td class="py-3 pr-4 font-medium">#${o._id.slice(-8).toUpperCase()}</td><td class="py-3 pr-4">${o.user?.name || 'N/A'}</td><td class="py-3 pr-4">${o.items.length}</td><td class="py-3 pr-4 font-medium">₹${displayTotal}</td><td class="py-3 pr-4"><span class="text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} capitalize">${o.status}</span></td><td class="py-3">${new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td></tr>`;
     }).join('') : '<tr><td colspan="6" class="py-8 text-center text-slate-400">No orders yet</td></tr>';
   } catch (err) { console.error(err); }
+
+  try {
+    const u = await apiCall('/admin/users/stats');
+    const utbody = document.getElementById('user-stats-body');
+    if (!utbody) return;
+    const users = u.users || [];
+    utbody.innerHTML = users.length ? users.map(u => `
+      <tr>
+        <td class="py-3 pr-4 font-medium text-slate-800">${u.name}</td>
+        <td class="py-3 pr-4 text-xs text-slate-500">${u.email}</td>
+        <td class="py-3 pr-4 text-sm text-slate-600">${u.phone || '-'}</td>
+        <td class="py-3 pr-4"><span class="text-sm font-bold ${u.totalOrders > 0 ? 'text-brand-700' : 'text-slate-400'}">${u.totalOrders}</span></td>
+        <td class="py-3"><span class="text-sm font-semibold text-slate-700">₹${u.totalSpent.toLocaleString('en-IN')}</span></td>
+      </tr>
+    `).join('') : '<tr><td colspan="5" class="py-8 text-center text-slate-400">No customers yet</td></tr>';
+  } catch (err) { console.error(err); }
 }
 
 /* ===================== PRODUCTS ===================== */
