@@ -188,7 +188,19 @@ async function loadOrders() {
 
 async function updateStatus(orderId, status) {
   if (!status) return;
-  try { await apiCall(`/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status }) }); loadOrders(); }
+  let note = '';
+  if (status === 'dispatched') {
+    note = prompt('Delivery partner / tracking info:', '');
+    if (note === null) return;
+  } else if (status === 'cancelled') {
+    note = prompt('Cancellation reason:', '');
+    if (note === null) return;
+  } else if (status === 'delivered') {
+    const partner = prompt('Delivery partner name:', '');
+    if (partner === null) return;
+    note = partner ? `Delivered by ${partner}` : 'Delivered';
+  }
+  try { await apiCall(`/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status, note }) }); loadOrders(); }
   catch (err) { alert(err.message); }
 }
 
