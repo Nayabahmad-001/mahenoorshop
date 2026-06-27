@@ -46,6 +46,12 @@ const orderSchema = new mongoose.Schema({
     orderId: String,
     paymentId: String,
     signature: String
+  },
+  deliveryOtp: { type: String },
+  deliveryPartner: {
+    name: String,
+    phone: String,
+    liveLocationLink: String
   }
 }, { timestamps: true });
 

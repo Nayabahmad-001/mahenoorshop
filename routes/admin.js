@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
@@ -60,12 +61,37 @@ router.get('/orders', async (req, res) => {
 });
 
 router.put('/orders/:id/status', async (req, res) => {
-  const { status, note } = req.body;
+  const { status, note, otp, deliveryPartner } = req.body;
   const valid = ['pending', 'confirmed', 'dispatched', 'delivered', 'cancelled'];
   if (!valid.includes(status)) return res.status(400).json({ message: 'Invalid status' });
   const order = await Order.findById(req.params.id);
   if (!order) return res.status(404).json({ message: 'Order not found' });
   if (order.status === status) return res.json({ order });
+
+  if (status === 'delivered') {
+    if (!order.deliveryOtp) return res.status(400).json({ message: 'No OTP set for this order. Dispatch first.' });
+    if (!otp) return res.status(400).json({ message: 'OTP is required to mark as delivered.' });
+    if (otp !== order.deliveryOtp) return res.status(400).json({ message: 'Incorrect OTP. Please get the correct OTP from the customer.' });
+  }
+
+  if (status === 'dispatched') {
+    const generatedOtp = crypto.randomInt(1000, 9999).toString();
+    order.deliveryOtp = generatedOtp;
+    if (deliveryPartner) {
+      order.deliveryPartner = {
+        name: deliveryPartner.name || '',
+        phone: deliveryPartner.phone || '',
+        liveLocationLink: deliveryPartner.liveLocationLink || ''
+      };
+    }
+    const partnerInfo = deliveryPartner ? `Delivery by ${deliveryPartner.name} (${deliveryPartner.phone})` : '';
+    const otpNote = [note, partnerInfo, `OTP: ${generatedOtp}`].filter(Boolean).join(' | ');
+    order.statusHistory.push({ status, timestamp: new Date(), note: otpNote });
+    order.status = status;
+    await order.save();
+    return res.json({ order, deliveryOtp: generatedOtp });
+  }
+
   order.statusHistory.push({ status, timestamp: new Date(), note: note || '' });
   order.status = status;
   await order.save();

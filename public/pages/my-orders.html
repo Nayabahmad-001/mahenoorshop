@@ -6,7 +6,9 @@
   <title>My Orders - Mahenoor Kirana Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config={theme:{extend:{colors:{brand:{600:'#059669',700:'#047857'},energy:{500:'#f97316',600:'#ea580c'}}}}}</script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     .timeline-dot { width: 12px; height: 12px; border-radius: 50%; position: relative; z-index: 1; flex-shrink: 0; }
     .timeline-line { position: absolute; top: 16px; left: 5px; width: 2px; height: calc(100% - 16px); }
@@ -191,13 +193,40 @@
                 ${o.deliveryCharge > 0 ? `<p class="text-xs text-slate-400">+₹${o.deliveryCharge} delivery</p>` : '<p class="text-xs text-emerald-600 font-medium">Free delivery</p>'}
               </div>
             </div>
-            <div class="mt-4 space-y-2">${o.items.map(i => `<div class="flex items-center gap-3 text-sm"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0" style="background:${i.name && (i.name.includes('Cold') || i.name.includes('Juice') || i.name.includes('Drink') || i.name.includes('Water') || i.name.includes('Cola') || i.name.includes('Soda')) ? '#ffedd5' : '#d1fae5'}">${i.name && (i.name.includes('Cold') || i.name.includes('Juice') || i.name.includes('Drink') || i.name.includes('Water') || i.name.includes('Cola') || i.name.includes('Soda')) ? '🥤' : '🍚'}</div><div class="flex-1 min-w-0"><p class="font-medium text-slate-800 truncate">${i.name}</p><p class="text-xs text-slate-400">Qty: ${i.quantity}</p></div><span class="font-semibold shrink-0">₹${i.sellingPrice * i.quantity}</span></div>`).join('')}</div>
-            ${o.shippingAddress ? `<div class="mt-3 text-xs text-slate-400 flex items-start gap-1.5"><span>📍</span><span>${o.shippingAddress.street}, ${o.shippingAddress.city}, ${o.shippingAddress.state} ${o.shippingAddress.pincode}</span></div>` : ''}
+            <div class="mt-4 space-y-2">${o.items.map(i => `<div class="flex items-center gap-3 text-sm"><div class="w-10 h-10 rounded-lg shrink-0 overflow-hidden bg-slate-100">${i.image ? `<img src="${i.image}" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=\\'w-10 h-10 flex items-center justify-center text-sm\\'>📦</div>'">` : '<div class="w-10 h-10 flex items-center justify-center text-sm">📦</div>'}</div><div class="flex-1 min-w-0"><p class="font-medium text-slate-800 text-sm truncate">${i.name}</p><p class="text-xs text-slate-400">Qty: ${i.quantity} × ₹${i.sellingPrice}</p></div><span class="font-semibold shrink-0 text-sm">₹${i.sellingPrice * i.quantity}</span></div>`).join('')}</div>
+            ${o.shippingAddress ? `<div class="mt-3 text-xs text-slate-400 flex items-start gap-1.5"><span>📍</span><span>${o.shippingAddress.street}, ${o.shippingAddress.city}, ${o.shippingAddress.state} ${o.shippingAddress.pincode}${o.deliveryLocation?.lat ? ` <a href="https://www.google.com/maps?q=${o.deliveryLocation.lat},${o.deliveryLocation.lng}" target="_blank" class="text-blue-600 hover:underline font-medium">(View on Map)</a>` : ''}</span></div>` : ''}
+            ${o.status === 'dispatched' || o.status === 'delivered' ? `
+            <div class="mt-3 border rounded-xl overflow-hidden ${o.status === 'delivered' ? 'border-emerald-200' : 'border-blue-200'}">
+              <div class="p-4 ${o.status === 'delivered' ? 'bg-emerald-50' : 'bg-blue-50'}">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-full ${o.status === 'delivered' ? 'bg-emerald-500' : 'bg-blue-500'} text-white flex items-center justify-center text-lg shrink-0">🚚</div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-slate-800">${o.deliveryPartner?.name || 'Delivery Partner'}</p>
+                    ${o.deliveryPartner?.phone ? `<a href="tel:${o.deliveryPartner.phone}" class="text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1">📞 ${o.deliveryPartner.phone}</a>` : ''}
+                  </div>
+                  ${o.status === 'dispatched' && o.deliveryOtp ? `<div class="shrink-0 text-right"><p class="text-[10px] text-blue-500 font-medium">OTP</p><p class="text-xl font-extrabold text-blue-600 tracking-widest">${o.deliveryOtp}</p></div>` : ''}
+                </div>
+              </div>
+              ${o.deliveryLocation?.lat ? `<div id="map-${o._id}" class="w-full h-48 sm:h-56"></div>` : ''}
+            </div>` : ''}
             ${renderTimeline(o.status, o.statusHistory)}
             <div class="feedback-section">${o.status === 'delivered' ? renderFeedbackForm(o._id, fb) : ''}</div>
           </div>`;
         }).join('');
+        orders.filter(o => o.deliveryLocation?.lat && (o.status === 'dispatched' || o.status === 'delivered')).forEach(o => {
+          setTimeout(() => initOrderMap(o._id, o.deliveryLocation.lat, o.deliveryLocation.lng), 100);
+        });
       } catch (err) { container.innerHTML = `<p class="text-red-500">${err.message}</p>`; }
+    }
+
+    function initOrderMap(orderId, lat, lng) {
+      const el = document.getElementById(`map-${orderId}`);
+      if (!el || el.dataset.initialized) return;
+      el.dataset.initialized = '1';
+      const map = L.map(el, { zoomControl: false }).setView([lat, lng], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      L.marker([lat, lng], { draggable: false }).addTo(map).bindPopup('📍 Delivery Location');
+      setTimeout(() => map.invalidateSize(), 200);
     }
     let refreshInterval;
     document.addEventListener('DOMContentLoaded', () => {

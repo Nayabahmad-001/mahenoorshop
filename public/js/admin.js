@@ -47,7 +47,8 @@ async function loadDashboard() {
     tbody.innerHTML = orders.length ? orders.map(o => {
       const s = STATUS[o.status] || { bg: 'bg-slate-100', text: 'text-slate-700' };
       const displayTotal = o.total || o.subtotal;
-      return `<tr><td class="py-3 pr-4 font-medium">#${o._id.slice(-8).toUpperCase()}</td><td class="py-3 pr-4">${o.user?.name || 'N/A'}</td><td class="py-3 pr-4">${o.items.length}</td><td class="py-3 pr-4 font-medium">₹${displayTotal}</td><td class="py-3 pr-4"><span class="text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} capitalize">${o.status}</span></td><td class="py-3">${new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td></tr>`;
+      const itemsSummary = o.items.map(item => `${item.name} ×${item.quantity}`).join(', ');
+      return `<tr><td class="py-3 pr-4 font-medium">#${o._id.slice(-8).toUpperCase()}</td><td class="py-3 pr-4">${o.user?.name || 'N/A'}</td><td class="py-3 pr-4 text-xs text-slate-600 max-w-[200px] truncate" title="${itemsSummary}">${itemsSummary}</td><td class="py-3 pr-4 font-medium">₹${displayTotal}</td><td class="py-3 pr-4"><span class="text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} capitalize">${o.status}</span></td><td class="py-3">${new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td></tr>`;
     }).join('') : '<tr><td colspan="6" class="py-8 text-center text-slate-400">No orders yet</td></tr>';
   } catch (err) { console.error(err); }
 
@@ -193,31 +194,71 @@ async function loadOrders() {
     const orders = r.orders || [];
     tbody.innerHTML = orders.map(o => {
       const s = STATUS[o.status] || { bg: 'bg-slate-100', text: 'text-slate-700' };
-      const displayTotal = o.total || o.subtotal;
       const paymentBadge = o.paymentMethod === 'razorpay'
         ? `<span class="text-xs font-semibold ${o.paymentStatus === 'paid' ? 'text-emerald-700' : 'text-amber-700'}">${o.paymentStatus === 'paid' ? '💳 Paid' : '💳 Pending'}</span>`
         : '<span class="text-xs text-slate-500">💵 COD</span>';
-      return `<tr><td class="py-3 pr-4 font-medium text-xs">#${o._id.slice(-10).toUpperCase()}</td><td class="py-3 pr-4"><div class="font-medium text-sm">${o.user?.name || 'N/A'}</div><div class="text-xs text-slate-400">${o.user?.email || ''}</div></td><td class="py-3 pr-4 text-sm">${o.phone}</td><td class="py-3 pr-4">${o.items.length}</td><td class="py-3 pr-4 font-medium">₹${displayTotal}${o.deliveryCharge > 0 ? `<span class="text-xs text-slate-400 ml-1">+₹${o.deliveryCharge}</span>` : ''}</td><td class="py-3 pr-4">${paymentBadge}</td><td class="py-3 pr-4"><span class="text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} capitalize">${o.status}</span></td><td class="py-3 pr-4 text-xs text-slate-400">${new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td><td class="py-3"><select onchange="updateStatus('${o._id}', this.value)" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-brand-500"><option value="">Update</option><option value="confirmed">Confirmed</option><option value="dispatched">Dispatched</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td></tr>`;
+      const itemsList = o.items.map(item => {
+        const itemTotal = (item.sellingPrice || 0) * item.quantity;
+        return `<div class="flex items-center gap-2 py-1 border-b border-slate-50 last:border-0">
+          ${item.image ? `<img src="${item.image}" class="w-7 h-7 rounded object-cover" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded bg-slate-100 flex items-center justify-center text-xs\\'>📦</div>'">` : '<div class="w-7 h-7 rounded bg-slate-100 flex items-center justify-center text-xs">📦</div>'}
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-medium text-slate-700 truncate">${item.name}</div>
+            <div class="text-[10px] text-slate-400">₹${item.sellingPrice} × ${item.quantity}</div>
+          </div>
+          <div class="text-xs font-semibold text-slate-700">₹${itemTotal}</div>
+        </div>`;
+      }).join('');
+      const totalQty = o.items.reduce((sum, item) => sum + item.quantity, 0);
+      const deliveryCharge = o.deliveryCharge || 0;
+      const subtotal = o.subtotal || o.items.reduce((s, item) => s + (item.sellingPrice || 0) * item.quantity, 0);
+      const total = o.total || subtotal + deliveryCharge;
+      const totalBlock = `
+        <div class="text-xs space-y-0.5">
+          <div class="flex justify-between text-slate-500"><span>Subtotal</span><span>₹${subtotal}</span></div>
+          ${deliveryCharge > 0 ? `<div class="flex justify-between text-slate-500"><span>Delivery</span><span>₹${deliveryCharge}</span></div>` : ''}
+          <div class="flex justify-between font-bold text-slate-800 border-t border-slate-200 pt-0.5 mt-0.5"><span>Total</span><span>₹${total}</span></div>
+        </div>`;
+      const locationHtml = o.deliveryLocation && o.deliveryLocation.lat && o.deliveryLocation.lng
+        ? `<a href="https://www.google.com/maps?q=${o.deliveryLocation.lat},${o.deliveryLocation.lng}" target="_blank" class="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium" title="${o.deliveryLocation.lat}, ${o.deliveryLocation.lng}">📍 Map</a>`
+        : `<span class="text-xs text-slate-400">—</span>`;
+      const partnerHtml = o.deliveryPartner?.name
+        ? `<div class="text-xs"><div class="font-medium text-slate-700">${o.deliveryPartner.name}</div>${o.deliveryPartner.phone ? `<div class="text-slate-400">${o.deliveryPartner.phone}</div>` : ''}${o.deliveryPartner.liveLocationLink ? `<a href="${o.deliveryPartner.liveLocationLink}" target="_blank" class="text-blue-600 hover:underline">📍 Live</a>` : ''}</div>`
+        : `<span class="text-xs text-slate-400">—</span>`;
+      return `<tr><td class="py-3 pr-4 font-medium text-xs">#${o._id.slice(-10).toUpperCase()}</td><td class="py-3 pr-4"><div class="font-medium text-sm">${o.user?.name || 'N/A'}</div><div class="text-xs text-slate-400">${o.user?.email || ''}</div></td><td class="py-3 pr-4 text-sm">${o.phone}</td><td class="py-3 pr-4 min-w-[200px]">${itemsList}</td><td class="py-3 pr-4 text-sm font-medium text-slate-700">${totalQty}</td><td class="py-3 pr-4">${totalBlock}</td><td class="py-3 pr-4">${paymentBadge}</td><td class="py-3 pr-4"><span class="text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} capitalize">${o.status}</span></td><td class="py-3 pr-4">${partnerHtml}</td><td class="py-3 pr-4">${locationHtml}</td><td class="py-3 pr-4 text-xs text-slate-400">${new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td><td class="py-3"><select onchange="updateStatus('${o._id}', this.value)" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-brand-500"><option value="">Update</option><option value="confirmed">Confirmed</option><option value="dispatched">Dispatched</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td></tr>`;
     }).join('');
-  } catch (err) { document.getElementById('orders-tbody').innerHTML = `<tr><td colspan="8" class="py-8 text-center text-red-500">${err.message}</td></tr>`; }
+  } catch (err) { document.getElementById('orders-tbody').innerHTML = `<tr><td colspan="12" class="py-8 text-center text-red-500">${err.message}</td></tr>`; }
 }
 
 async function updateStatus(orderId, status) {
   if (!status) return;
   let note = '';
+  let otp = '';
   if (status === 'dispatched') {
-    note = prompt('Delivery partner / tracking info:', '');
-    if (note === null) return;
+    const partnerName = prompt('Delivery partner name:', '');
+    if (partnerName === null) return;
+    const partnerPhone = prompt('Delivery partner phone number:', '');
+    if (partnerPhone === null) return;
+    const locationLink = prompt('Live location link (Google Maps share link, optional):', '');
+    const deliveryPartner = { name: partnerName, phone: partnerPhone, liveLocationLink: locationLink || '' };
+    try {
+      const res = await apiCall(`/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status, note: '', deliveryPartner }) });
+      if (res.deliveryOtp) alert(`OTP generated for this order: ${res.deliveryOtp}\nShare this OTP with the customer.`);
+      loadOrders();
+    } catch (err) { alert(err.message); }
+    return;
   } else if (status === 'cancelled') {
     note = prompt('Cancellation reason:', '');
     if (note === null) return;
   } else if (status === 'delivered') {
-    const partner = prompt('Delivery partner name:', '');
-    if (partner === null) return;
-    note = partner ? `Delivered by ${partner}` : 'Delivered';
+    otp = prompt('Enter OTP from customer to confirm delivery:', '');
+    if (otp === null) return;
+    if (!otp.trim()) { alert('OTP is required to confirm delivery.'); return; }
   }
-  try { await apiCall(`/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status, note }) }); loadOrders(); }
-  catch (err) { alert(err.message); }
+  try {
+    const res = await apiCall(`/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status, note, otp }) });
+    if (res.deliveryOtp) alert(`OTP generated for this order: ${res.deliveryOtp}\nShare this OTP with the customer.`);
+    loadOrders();
+  } catch (err) { alert(err.message); }
 }
 
 /* Init */
