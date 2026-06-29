@@ -17,34 +17,53 @@ function logoutUser(e) {
   window.location.href = '/';
 }
 
+function toggleUserMenu() {
+  const menu = document.getElementById('user-menu-dropdown');
+  if (menu) menu.classList.toggle('hidden');
+}
+
+function closeUserMenu() {
+  const menu = document.getElementById('user-menu-dropdown');
+  if (menu) menu.classList.add('hidden');
+}
+
 function updateNav() {
-  const el = document.getElementById('nav-auth');
-  const ordersEl = document.getElementById('nav-orders');
-  const logoutEl = document.getElementById('nav-logout');
-  if (!el) return;
+  const menuOrders = document.getElementById('menu-orders');
+  const menuDashboard = document.getElementById('menu-dashboard');
+  const menuProfile = document.getElementById('menu-profile');
+  const menuLogin = document.getElementById('menu-login');
+  const menuLogout = document.getElementById('menu-logout');
+  const menuUserHeader = document.getElementById('menu-user-header');
+  const menuUserName = document.getElementById('menu-user-name');
+  const menuUserRole = document.getElementById('menu-user-role');
+  const menuAvatar = document.getElementById('menu-avatar');
+
   if (isLoggedIn()) {
     const u = getUser();
-    const nameLetter = u.name.charAt(0).toUpperCase();
-    if (ordersEl) {
-      ordersEl.classList.remove('hidden');
-      ordersEl.style.display = '';
-    }
-    if (logoutEl) {
-      logoutEl.classList.remove('hidden');
-      logoutEl.style.display = '';
-    }
-    if (isAdmin()) {
-      el.innerHTML = '<div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">' + nameLetter + '</span><span class="hidden md:inline text-sm font-medium">Dashboard</span></div>';
-      el.href = '/admin/index.html';
+    const isAdminUser = u && u.role === 'admin';
+
+    if (menuOrders) { menuOrders.classList.remove('hidden'); menuOrders.classList.add('flex'); }
+    if (menuLogout) { menuLogout.classList.remove('hidden'); menuLogout.classList.add('flex'); }
+    if (menuLogin) menuLogin.classList.add('hidden');
+    if (menuUserHeader) menuUserHeader.classList.remove('hidden');
+    if (menuUserName) menuUserName.textContent = u.name;
+    if (menuAvatar) menuAvatar.textContent = u.name.charAt(0).toUpperCase();
+    if (menuUserRole) menuUserRole.textContent = isAdminUser ? 'Admin' : 'Customer';
+
+    if (isAdminUser) {
+      if (menuDashboard) { menuDashboard.classList.remove('hidden'); menuDashboard.classList.add('flex'); }
+      if (menuProfile) menuProfile.classList.add('hidden');
     } else {
-      el.innerHTML = '<div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">' + nameLetter + '</span><span class="hidden md:inline text-sm font-medium">Profile</span></div>';
-      el.href = '/pages/profile.html';
+      if (menuDashboard) menuDashboard.classList.add('hidden');
+      if (menuProfile) { menuProfile.classList.remove('hidden'); menuProfile.classList.add('flex'); }
     }
   } else {
-    if (ordersEl) ordersEl.classList.add('hidden');
-    if (logoutEl) logoutEl.classList.add('hidden');
-    el.innerHTML = 'Login';
-    el.href = '/pages/login.html';
+    if (menuOrders) menuOrders.classList.add('hidden');
+    if (menuDashboard) menuDashboard.classList.add('hidden');
+    if (menuProfile) menuProfile.classList.add('hidden');
+    if (menuLogout) menuLogout.classList.add('hidden');
+    if (menuLogin) menuLogin.classList.remove('hidden');
+    if (menuUserHeader) menuUserHeader.classList.add('hidden');
   }
 }
 
@@ -58,4 +77,14 @@ async function apiCall(url, opts = {}) {
   return data;
 }
 
-document.addEventListener('DOMContentLoaded', updateNav);
+document.addEventListener('DOMContentLoaded', () => {
+  updateNav();
+
+  document.addEventListener('click', (e) => {
+    const container = document.getElementById('user-menu-container');
+    const menu = document.getElementById('user-menu-dropdown');
+    if (container && menu && !container.contains(e.target) && !menu.classList.contains('hidden')) {
+      menu.classList.add('hidden');
+    }
+  });
+});

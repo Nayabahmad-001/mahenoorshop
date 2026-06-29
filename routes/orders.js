@@ -2,6 +2,7 @@ const express = require('express');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -9,6 +10,23 @@ const router = express.Router();
 const DELIVERY_CHARGE = 20;
 const FREE_DELIVERY_THRESHOLD = 100;
 const ADMIN_PHONE = '9341782080';
+
+async function sendSmsNotification(message) {
+  try {
+    const fast2smsApiKey = process.env.FAST2SMS_API_KEY;
+    if (!fast2smsApiKey) return;
+    const https = require('https');
+    const body = JSON.stringify({ route: 'q', numbers: ADMIN_PHONE, message, language: 'unicode' });
+    const req = https.request({
+      hostname: 'www.fast2sms.com', path: '/dev/bulkV2', method: 'POST',
+      headers: { authorization: fast2smsApiKey, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+    });
+    req.write(body);
+    req.end();
+  } catch (err) {
+    console.log('SMS notification failed (optional):', err.message);
+  }
+}
 
 async function autoSaveAddress(userId, shippingAddress) {
   const user = await User.findById(userId);
@@ -70,6 +88,26 @@ router.post('/', protect, async (req, res) => {
   });
 
   await autoSaveAddress(req.user._id, shippingAddress);
+
+  try {
+    const user = req.user;
+    const itemsSummary = orderItems.map(i => `${i.name}×${i.quantity}`).join(', ');
+    const shortId = order._id.toString().slice(-8).toUpperCase();
+
+    await Notification.create({
+      type: 'new_order',
+      title: '🆕 New Order Received!',
+      message: `${user.name} ordered ${itemsSummary} — ₹${total} | Phone: ${phone} | Address: ${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.pincode}`,
+      link: `/admin/orders.html`,
+      relatedId: order._id.toString(),
+      priority: 'high'
+    });
+
+    const smsMsg = `New Order #${shortId}: ${user.name} ordered ${itemsSummary} Total: Rs.${total}. Address: ${shippingAddress.street}, ${shippingAddress.city}-${shippingAddress.pincode}. Phone: ${phone}`;
+    sendSmsNotification(smsMsg);
+  } catch (notifErr) {
+    console.log('Notification creation failed:', notifErr.message);
+  }
 
   res.status(201).json({ order });
 });

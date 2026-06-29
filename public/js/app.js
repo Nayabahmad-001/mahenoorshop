@@ -43,6 +43,14 @@ function saveCart(cart) {
 function updateCartCount() {
   const count = getCart().reduce((s, i) => s + i.quantity, 0);
   document.querySelectorAll('#cart-count').forEach(el => el.textContent = count);
+  const menuCount = document.getElementById('menu-cart-count');
+  if (menuCount) menuCount.textContent = count;
+  const menuBadge = document.getElementById('menu-badge');
+  if (menuBadge) {
+    menuBadge.textContent = count;
+    menuBadge.classList.toggle('hidden', count === 0);
+    menuBadge.classList.toggle('flex', count > 0);
+  }
 }
 
 function openCartDrawer() {
@@ -158,12 +166,26 @@ function updateQty(productId, delta) {
   renderCartDrawer();
 }
 
+function shareProduct(id, name, price, unit) {
+  const text = `🛒 *${name}* - ₹${price}/${unit}\n\nOrder from Mahenoor Kirana Store!\n${window.location.origin}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function shareStore() {
+  const text = `🛒 *Mahenoor Kirana Store* - Best prices on daily ration & cold drinks! Order now: ${window.location.origin}`;
+  if (navigator.share) {
+    navigator.share({ title: 'Mahenoor Kirana Store', text, url: window.location.origin });
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+}
+
 function renderProducts(products) {
   const container = document.getElementById('products-container');
   if (!container) return;
 
   if (!products || products.length === 0) {
-    container.innerHTML = '<div class="col-span-full text-center py-16 text-slate-400"><div class="text-5xl mb-3">🔍</div><p class="text-lg font-medium">No products found</p></div>';
+    container.innerHTML = '<div class="text-center py-16 text-slate-400 w-full"><div class="text-5xl mb-3">🔍</div><p class="text-lg font-medium">No products found</p></div>';
     return;
   }
 
@@ -188,6 +210,9 @@ function renderProducts(products) {
           ${imgHtml}
           ${discount >= 5 ? `<div class="absolute top-3 right-3 bg-energy-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg">${discount}% OFF</div>` : ''}
           ${savings >= 10 ? `<div class="absolute top-3 left-3 bg-amber-400 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-lg">Save ₹${savings}</div>` : ''}
+          <button onclick='shareProduct("${p._id}","${p.name.replace(/"/g, '&quot;')}",${p.sellingPrice},"${p.unit}")' class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/90 shadow-md flex items-center justify-center hover:bg-white transition z-10" title="Share via WhatsApp">
+            <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+          </button>
         </div>
         <div class="p-3 md:p-4 flex flex-col flex-1">
           <span class="text-xs font-semibold uppercase tracking-wider text-brand-600">${p.category}</span>
@@ -217,20 +242,17 @@ function renderProducts(products) {
 }
 
 let currentPage = 1;
-let totalPages = 1;
 
 async function loadProducts(category = 'all', search = '', sort = '', page = 1) {
   const container = document.getElementById('products-container');
   const loader = document.getElementById('loader');
-  const paginationEl = document.getElementById('pagination');
   if (!container) return;
 
   container.innerHTML = '';
-  if (paginationEl) paginationEl.innerHTML = '';
   loader.classList.remove('hidden');
 
   try {
-    let url = `/products?limit=20&page=${page}`;
+    let url = `/products?limit=100&page=${page}`;
     if (category && category !== 'all') url += `&category=${encodeURIComponent(category)}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
     if (sort) url += `&sort=${sort}`;
@@ -238,25 +260,10 @@ async function loadProducts(category = 'all', search = '', sort = '', page = 1) 
     const res = await apiCall(url);
     loader.classList.add('hidden');
     renderProducts(res.products);
-    currentPage = res.page || page;
-    totalPages = res.pages || 1;
-    renderPagination();
   } catch (err) {
     loader.classList.add('hidden');
-    container.innerHTML = `<div class="col-span-full text-center py-16 text-red-500"><p>${err.message}</p></div>`;
+    container.innerHTML = `<div class="text-center py-16 text-red-500 w-full"><p>${err.message}</p></div>`;
   }
-}
-
-function renderPagination() {
-  const el = document.getElementById('pagination');
-  if (!el || totalPages <= 1) { if (el) el.innerHTML = ''; return; }
-  el.innerHTML = `<div class="flex items-center justify-center gap-2 mt-8">
-    <button onclick="goToPage(${currentPage - 1})" class="px-4 py-2 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-600 hover:border-brand-300 hover:text-brand-700 transition ${currentPage <= 1 ? 'opacity-40 pointer-events-none' : ''}">← Prev</button>
-    ${Array.from({ length: totalPages }, (_, i) => i + 1).map(p =>
-      `<button onclick="goToPage(${p})" class="w-11 h-11 rounded-xl text-sm font-bold transition ${p === currentPage ? 'bg-brand-600 text-white' : 'border-2 border-slate-200 text-slate-600 hover:border-brand-300 hover:text-brand-700'}">${p}</button>`
-    ).join('')}
-    <button onclick="goToPage(${currentPage + 1})" class="px-4 py-2 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-600 hover:border-brand-300 hover:text-brand-700 transition ${currentPage >= totalPages ? 'opacity-40 pointer-events-none' : ''}">Next →</button>
-  </div>`;
 }
 
 function getSortValue() {
@@ -264,7 +271,6 @@ function getSortValue() {
 }
 
 function goToPage(page) {
-  if (page < 1 || page > totalPages) return;
   const activeTab = document.querySelector('.category-tab.active');
   const cat = activeTab ? activeTab.dataset.category : 'all';
   const search = document.getElementById('search-input')?.value || '';
@@ -273,7 +279,11 @@ function goToPage(page) {
   window.scrollTo({ top: document.getElementById('products')?.offsetTop - 80, behavior: 'smooth' });
 }
 
-const SERVICEABLE_AREAS = [];
+const SERVICEABLE_AREAS = [
+  { pincode: '843129', name: 'Khanpur Gaon', area: 'Khanpur Berain', city: 'Samastipur', state: 'Bihar' },
+  { pincode: '843101', name: 'Samastipur City', area: 'Samastipur', city: 'Samastipur', state: 'Bihar' },
+  { pincode: '848101', name: 'Dalsinghsarai', area: 'Dalsinghsarai', city: 'Samastipur', state: 'Bihar' }
+];
 
 let pincodeLookupCache = {};
 
@@ -303,7 +313,13 @@ function toggleLocation() {
 function renderPopularAreas() {
   const container = document.getElementById('popular-areas');
   if (!container) return;
-  container.innerHTML = '<p class="text-xs text-slate-400 col-span-2">Enter your pincode above to check delivery availability</p>';
+  if (SERVICEABLE_AREAS.length > 0) {
+    container.innerHTML = SERVICEABLE_AREAS.map(a =>
+      `<button onclick="selectArea('${a.pincode}','${a.area || a.name}','${a.city}','${a.state}')" class="text-xs text-left px-3 py-2 rounded-xl bg-slate-50 hover:bg-brand-50 hover:text-brand-700 border border-slate-100 hover:border-brand-200 transition font-medium">📍 ${a.name || a.area}</button>`
+    ).join('');
+  } else {
+    container.innerHTML = '<p class="text-xs text-slate-400 col-span-2">Enter your pincode above to check delivery availability</p>';
+  }
 }
 
 async function selectArea(pincode, area, city, state) {
@@ -502,4 +518,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   filterProducts();
+
+  // Promo Carousel
+  const promos = document.querySelectorAll('.promo-slide');
+  const dots = document.querySelectorAll('.promo-dot');
+  if (promos.length) {
+    let idx = 0;
+    function showPromo(i) {
+      promos.forEach(p => p.classList.remove('active'));
+      dots.forEach(d => d.classList.remove('active'));
+      promos[i].classList.add('active');
+      dots[i].classList.add('active');
+      idx = i;
+    }
+    dots.forEach(d => d.addEventListener('click', () => showPromo(parseInt(d.dataset.index))));
+    setInterval(() => showPromo((idx + 1) % promos.length), 3500);
+  }
 });

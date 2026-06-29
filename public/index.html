@@ -21,6 +21,11 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
+  <!-- Store Info Banner -->
+  <div class="bg-brand-700 text-white text-center text-xs py-2 px-4 font-medium">
+    🚚 Free delivery on orders ₹100+ &nbsp;|&nbsp; 📍 Delivery in <strong>Khanpur Gaon (843129)</strong> & nearby &nbsp;|&nbsp; ⏰ Open: 7 AM - 10 PM
+  </div>
+
   <!-- Navbar -->
   <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,13 +66,53 @@
               </div>
             </div>
           </div>
-          <button onclick="openCartDrawer()" class="relative p-3 text-slate-600 hover:text-brand-600 transition">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
-            <span id="cart-count" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-energy-500 text-white text-xs font-bold flex items-center justify-center">0</span>
-          </button>
-          <a id="nav-orders" href="/pages/my-orders.html" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition hidden">My Orders</a>
-          <a id="nav-auth" href="/pages/login.html" class="text-sm font-semibold text-slate-700 hover:text-brand-600 transition">Login</a>
-          <a id="nav-logout" href="#" onclick="logoutUser(event)" class="text-sm font-semibold text-red-500 hover:text-red-700 transition hidden">Logout</a>
+          <!-- User Menu -->
+          <div class="relative" id="user-menu-container">
+            <button onclick="toggleUserMenu()" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 transition-all text-slate-600" id="menu-btn" aria-label="Menu">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              <span id="menu-badge" class="hidden text-[10px] font-bold bg-energy-500 text-white w-4 h-4 rounded-full flex items-center justify-center">0</span>
+            </button>
+            <div id="user-menu-dropdown" class="hidden absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 overflow-hidden">
+              <div id="menu-user-header" class="hidden px-4 py-3 bg-gradient-to-r from-brand-50 to-brand-100/50 border-b border-brand-100">
+                <div class="flex items-center gap-3">
+                  <div id="menu-avatar" class="w-9 h-9 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-sm">M</div>
+                  <div class="flex-1 min-w-0">
+                    <p id="menu-user-name" class="font-bold text-sm text-slate-800 truncate">User</p>
+                    <p id="menu-user-role" class="text-xs text-slate-500">Customer</p>
+                  </div>
+                </div>
+              </div>
+              <div class="py-1">
+                <a href="#" onclick="openCartDrawer(); closeUserMenu(); return false;" class="flex items-center gap-3 px-4 py-2.5 hover:bg-brand-50 transition-colors text-sm font-medium text-slate-700">
+                  <span class="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center text-base">🛒</span>
+                  <span>Cart</span>
+                  <span id="menu-cart-count" class="ml-auto bg-energy-500 text-white text-xs font-bold min-w-[22px] h-5 px-1.5 flex items-center justify-center rounded-full">0</span>
+                </a>
+                <div class="mx-3 my-1 border-t border-slate-100"></div>
+                <a id="menu-orders" href="/pages/my-orders.html" onclick="closeUserMenu()" class="hidden items-center gap-3 px-4 py-2.5 hover:bg-sky-50 transition-colors text-sm font-medium text-slate-700">
+                  <span class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center text-base">📦</span>
+                  My Orders
+                </a>
+                <a id="menu-profile" href="/pages/profile.html" onclick="closeUserMenu()" class="hidden items-center gap-3 px-4 py-2.5 hover:bg-amber-50 transition-colors text-sm font-medium text-slate-700">
+                  <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-base">👤</span>
+                  Profile
+                </a>
+                <a id="menu-dashboard" href="/admin/index.html" onclick="closeUserMenu()" class="hidden items-center gap-3 px-4 py-2.5 hover:bg-purple-50 transition-colors text-sm font-medium text-slate-700">
+                  <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-base">📊</span>
+                  Dashboard
+                </a>
+                <div class="mx-3 my-1 border-t border-slate-100"></div>
+                <a id="menu-login" href="/pages/login.html" onclick="closeUserMenu()" class="flex items-center gap-3 px-4 py-2.5 hover:bg-brand-50 transition-colors text-sm font-medium text-brand-600">
+                  <span class="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center text-base">🔑</span>
+                  Login
+                </a>
+                <a id="menu-logout" href="#" onclick="logoutUser(event)" class="hidden items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors text-sm font-medium text-red-500">
+                  <span class="w-8 h-8 rounded-lg bg-red-100 text-red-500 flex items-center justify-center text-base">🚪</span>
+                  Logout
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="lg:hidden flex items-center gap-2 pb-3">
@@ -95,7 +140,7 @@
       <div class="text-center md:text-left md:flex md:items-center md:justify-between">
         <div class="max-w-xl">
           <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-4 animate-pulse">
-            <span class="w-2 h-2 rounded-full bg-green-300"></span> Same Day Delivery
+            <span class="w-2 h-2 rounded-full bg-green-300"></span> Same Day Delivery in <strong>Khanpur (843129)</strong>
           </div>
           <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">
             Fresh Ration &<br><span class="text-energy-300 hero-title">Chilled Drinks</span>
@@ -106,25 +151,53 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
             <a href="#deals" class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/20 transition">View Deals</a>
+            <button onclick="shareStore()" class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/20 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+              Share Store
+            </button>
           </div>
-          <!-- 3 Promo Cards -->
-          <div class="grid grid-cols-3 gap-2 sm:gap-3 mt-8">
-            <div class="promo-card fade-slide-up bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3 sm:p-4 text-center">
+        </div>
+        <div class="hidden md:block text-8xl opacity-20">🛒</div>
+      </div>
+      <!-- Promo Carousel - Full Width -->
+      <div class="mt-8" id="promo-carousel">
+        <div class="relative h-24 md:h-28 max-w-lg mx-auto">
+          <div class="promo-slide active">
+            <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3 sm:p-4 text-center h-full flex flex-col items-center justify-center">
               <div class="text-2xl sm:text-3xl mb-1">🏆</div>
               <div class="text-xs sm:text-sm font-bold text-white">Best Price</div>
               <div class="text-[10px] sm:text-xs text-white/60">Lowest rates guaranteed</div>
             </div>
-            <div class="promo-card fade-slide-up bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3 sm:p-4 text-center">
+          </div>
+          <div class="promo-slide">
+            <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3 sm:p-4 text-center h-full flex flex-col items-center justify-center">
               <div class="text-2xl sm:text-3xl mb-1">🚚</div>
               <div class="text-xs sm:text-sm font-bold text-white">Home Delivery</div>
               <div class="text-[10px] sm:text-xs text-white/60">Free on orders ₹100+</div>
             </div>
-            <div class="promo-card fade-slide-up bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3 sm:p-4 text-center">
+          </div>
+          <div class="promo-slide">
+            <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3 sm:p-4 text-center h-full flex flex-col items-center justify-center">
               <div class="text-2xl sm:text-3xl mb-1">🌙</div>
               <div class="text-xs sm:text-sm font-bold text-white">Muharram Offer</div>
               <div class="text-[10px] sm:text-xs text-white/60">Special discounts!</div>
             </div>
           </div>
+          <div class="promo-slide">
+            <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3 sm:p-4 text-center h-full flex flex-col items-center justify-center cursor-pointer" onclick="shareStore()">
+              <div class="text-2xl sm:text-3xl mb-1">👥</div>
+              <div class="text-xs sm:text-sm font-bold text-white">Share with Friend</div>
+              <div class="text-[10px] sm:text-xs text-white/60">Tap to share store link!</div>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-center gap-2 mt-3">
+          <button class="promo-dot active" data-index="0"></button>
+          <button class="promo-dot" data-index="1"></button>
+          <button class="promo-dot" data-index="2"></button>
+          <button class="promo-dot" data-index="3"></button>
+        </div>
+      </div>
         </div>
         <div class="hidden md:block text-8xl opacity-20">🛒</div>
       </div>
@@ -166,12 +239,12 @@
 
   <!-- Products -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div id="products-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5"></div>
+    <div id="products-container" class="grid grid-cols-2 gap-3 md:gap-4"></div>
     <div id="loader" class="text-center py-16 hidden">
       <div class="inline-block w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
       <p class="mt-3 text-slate-500 text-sm">Loading products...</p>
     </div>
-    <div id="pagination"></div>
+
   </main>
 
   <!-- Footer -->
@@ -218,6 +291,11 @@
     <div id="cart-drawer-items" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
     <div id="cart-drawer-footer" class="border-t border-slate-200 p-5"></div>
   </div>
+
+  <!-- Floating WhatsApp -->
+  <a href="https://wa.me/919341782080?text=Hi!%20I%20want%20to%20order%20from%20Mahenoor%20Kirana" target="_blank" class="whatsapp-float" title="Order on WhatsApp" aria-label="Chat on WhatsApp">
+    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
 
   <script src="/js/auth.js"></script>
   <script src="/js/app.js"></script>

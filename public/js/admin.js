@@ -224,7 +224,10 @@ async function loadOrders() {
       const partnerHtml = o.deliveryPartner?.name
         ? `<div class="text-xs"><div class="font-medium text-slate-700">${o.deliveryPartner.name}</div>${o.deliveryPartner.phone ? `<div class="text-slate-400">${o.deliveryPartner.phone}</div>` : ''}${o.deliveryPartner.liveLocationLink ? `<a href="${o.deliveryPartner.liveLocationLink}" target="_blank" class="text-blue-600 hover:underline">📍 Live</a>` : ''}</div>`
         : `<span class="text-xs text-slate-400">—</span>`;
-      return `<tr><td class="py-3 pr-4 font-medium text-xs">#${o._id.slice(-10).toUpperCase()}</td><td class="py-3 pr-4"><div class="font-medium text-sm">${o.user?.name || 'N/A'}</div><div class="text-xs text-slate-400">${o.user?.email || ''}</div></td><td class="py-3 pr-4 text-sm">${o.phone}</td><td class="py-3 pr-4 min-w-[200px]">${itemsList}</td><td class="py-3 pr-4 text-sm font-medium text-slate-700">${totalQty}</td><td class="py-3 pr-4">${totalBlock}</td><td class="py-3 pr-4">${paymentBadge}</td><td class="py-3 pr-4"><span class="text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} capitalize">${o.status}</span></td><td class="py-3 pr-4">${partnerHtml}</td><td class="py-3 pr-4">${locationHtml}</td><td class="py-3 pr-4 text-xs text-slate-400">${new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td><td class="py-3"><select onchange="updateStatus('${o._id}', this.value)" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-brand-500"><option value="">Update</option><option value="confirmed">Confirmed</option><option value="dispatched">Dispatched</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td></tr>`;
+      const addressHtml = o.user?.address
+        ? `<div class="text-xs text-slate-600 max-w-[160px]" title="${o.shippingAddress?.street || ''}, ${o.shippingAddress?.city || ''}">${o.shippingAddress?.street ? '<span class="font-medium">'+o.shippingAddress.street+'</span><br>' : ''}${o.shippingAddress?.city ? o.shippingAddress.city : ''}${o.shippingAddress?.pincode ? ' - '+o.shippingAddress.pincode : ''}</div>`
+        : `<span class="text-xs text-slate-400">${o.shippingAddress?.street || ''}, ${o.shippingAddress?.city || ''}</span>`;
+      return `<tr><td class="py-3 pr-4 font-medium text-xs">#${o._id.slice(-10).toUpperCase()}</td><td class="py-3 pr-4"><div class="font-medium text-sm">${o.user?.name || 'N/A'}</div><div class="text-xs text-slate-400">${o.user?.email || ''}</div></td><td class="py-3 pr-4 text-xs max-w-[160px]">${addressHtml}</td><td class="py-3 pr-4 text-sm">${o.phone}</td><td class="py-3 pr-4 min-w-[200px]">${itemsList}</td><td class="py-3 pr-4 text-sm font-medium text-slate-700">${totalQty}</td><td class="py-3 pr-4">${totalBlock}</td><td class="py-3 pr-4">${paymentBadge}</td><td class="py-3 pr-4"><span class="text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} capitalize">${o.status}</span></td><td class="py-3 pr-4">${partnerHtml}</td><td class="py-3 pr-4">${locationHtml}</td><td class="py-3 pr-4 text-xs text-slate-400">${new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td><td class="py-3"><select onchange="updateStatus('${o._id}', this.value)" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-brand-500"><option value="">Update</option><option value="confirmed">Confirmed</option><option value="dispatched">Dispatched</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td></tr>`;
     }).join('');
   } catch (err) { document.getElementById('orders-tbody').innerHTML = `<tr><td colspan="12" class="py-8 text-center text-red-500">${err.message}</td></tr>`; }
 }
@@ -261,9 +264,82 @@ async function updateStatus(orderId, status) {
   } catch (err) { alert(err.message); }
 }
 
+/* ===================== NOTIFICATIONS ===================== */
+let notifCheckInterval;
+
+async function loadNotifications() {
+  try {
+    const r = await apiCall('/admin/notifications');
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+      if (r.unreadCount > 0) {
+        badge.textContent = r.unreadCount > 9 ? '9+' : r.unreadCount;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+    const list = document.getElementById('notif-list');
+    if (!list) return;
+    const notifs = r.notifications || [];
+    if (notifs.length === 0) {
+      list.innerHTML = '<div class="text-center py-8 text-slate-400 text-sm">No notifications yet</div>';
+      return;
+    }
+    list.innerHTML = notifs.map(n => `
+      <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition cursor-pointer ${n.isRead ? '' : 'bg-brand-50/50 border border-brand-100'}" onclick="markNotifRead('${n._id}')">
+        <div class="text-lg shrink-0 mt-0.5">${n.type === 'new_order' ? '🆕' : n.type === 'order_status' ? '📦' : n.type === 'low_stock' ? '⚠️' : '👤'}</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium text-slate-800">${n.title}</div>
+          <div class="text-xs text-slate-500 mt-0.5 line-clamp-2">${n.message}</div>
+          <div class="text-[10px] text-slate-400 mt-1">${new Date(n.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
+        </div>
+        ${n.isRead ? '' : '<div class="w-2 h-2 rounded-full bg-brand-500 shrink-0 mt-2"></div>'}
+      </div>
+    `).join('');
+  } catch (err) { console.error('Notifications error:', err); }
+}
+
+function toggleNotifications() {
+  const dd = document.getElementById('notif-dropdown');
+  if (dd) {
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) loadNotifications();
+  }
+}
+
+async function markNotifRead(id) {
+  try { await apiCall(`/admin/notifications/${id}/read`, { method: 'PUT' }); loadNotifications(); }
+  catch (err) { console.error(err); }
+}
+
+async function markAllNotifRead() {
+  try { await apiCall('/admin/notifications/read-all', { method: 'PUT' }); loadNotifications(); }
+  catch (err) { console.error(err); }
+}
+
+function startNotifPolling() {
+  loadNotifications();
+  notifCheckInterval = setInterval(loadNotifications, 15000);
+}
+
+/* Close notification dropdown on outside click */
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('notif-dropdown');
+  const btn = document.getElementById('notif-btn');
+  if (dd && btn && !dd.classList.contains('hidden') && !btn.contains(e.target) && !dd.contains(e.target)) {
+    dd.classList.add('hidden');
+  }
+});
+
 /* Init */
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.location.pathname.includes('/admin/index.html') || window.location.pathname === '/admin/') loadDashboard();
+  if (window.location.pathname.includes('/admin/index.html') || window.location.pathname === '/admin/') {
+    loadDashboard();
+    startNotifPolling();
+  }
   if (window.location.pathname.includes('/admin/products.html')) loadProducts();
   if (window.location.pathname.includes('/admin/orders.html')) loadOrders();
+  /* Show notifications bell on all admin pages */
+  if (document.getElementById('notif-btn')) startNotifPolling();
 });

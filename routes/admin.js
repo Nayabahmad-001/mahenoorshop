@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const { protect, adminOnly } = require('../middleware/auth');
 
 const router = express.Router();
@@ -56,7 +57,7 @@ router.get('/orders', async (req, res) => {
   const query = {};
   if (status) query.status = status;
   const total = await Order.countDocuments(query);
-  const orders = await Order.find(query).populate('user', 'name email phone').sort({ createdAt: -1 }).skip((Number(page) - 1) * Number(limit)).limit(Number(limit));
+  const orders = await Order.find(query).populate('user', 'name email phone address').sort({ createdAt: -1 }).skip((Number(page) - 1) * Number(limit)).limit(Number(limit));
   res.json({ orders, total, pages: Math.ceil(total / Number(limit)) });
 });
 
@@ -116,14 +117,31 @@ router.get('/users/stats', async (req, res) => {
     name: userMap[s._id.toString()]?.name || 'Unknown',
     email: userMap[s._id.toString()]?.email || '',
     phone: userMap[s._id.toString()]?.phone || '',
+    address: userMap[s._id.toString()]?.address || null,
     totalOrders: s.totalOrders,
     totalSpent: s.totalSpent
   }));
   const noOrderUsers = users.filter(u => !stats.find(s => s._id.toString() === u._id.toString()));
   noOrderUsers.forEach(u => {
-    result.push({ _id: u._id, name: u.name, email: u.email, phone: u.phone, totalOrders: 0, totalSpent: 0 });
+    result.push({ _id: u._id, name: u.name, email: u.email, phone: u.phone, address: u.address || null, totalOrders: 0, totalSpent: 0 });
   });
   res.json({ users: result });
+});
+
+router.get('/notifications', async (req, res) => {
+  const notifications = await Notification.find().sort({ createdAt: -1 }).limit(50);
+  const unreadCount = await Notification.countDocuments({ isRead: false });
+  res.json({ notifications, unreadCount });
+});
+
+router.put('/notifications/read-all', async (req, res) => {
+  await Notification.updateMany({ isRead: false }, { isRead: true });
+  res.json({ message: 'All notifications marked as read' });
+});
+
+router.put('/notifications/:id/read', async (req, res) => {
+  await Notification.findByIdAndUpdate(req.params.id, { isRead: true });
+  res.json({ message: 'Notification marked as read' });
 });
 
 module.exports = router;
