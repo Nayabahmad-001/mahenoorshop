@@ -11,6 +11,10 @@ const DELIVERY_CHARGE = 20;
 const FREE_DELIVERY_THRESHOLD = 100;
 const ADMIN_PHONE = '9341782080';
 
+const STORES = [
+  { id: 'main', name: 'Mahenoor Kirana - Main Store', address: 'Khanpur Gaon, Samastipur, Bihar 843129', phone: '9341782080', lat: 25.5954, lng: 85.6677, hours: '8:00 AM - 10:00 PM', pickupNote: 'Order will be ready in 30 minutes' }
+];
+
 async function sendSmsNotification(message) {
   try {
     const fast2smsApiKey = process.env.FAST2SMS_API_KEY;
@@ -21,6 +25,7 @@ async function sendSmsNotification(message) {
       hostname: 'www.fast2sms.com', path: '/dev/bulkV2', method: 'POST',
       headers: { authorization: fast2smsApiKey, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
     });
+    req.on('error', () => {});
     req.write(body);
     req.end();
   } catch (err) {
@@ -31,17 +36,22 @@ async function sendSmsNotification(message) {
 async function autoSaveAddress(userId, shippingAddress) {
   const user = await User.findById(userId);
   if (!user) return;
-  const hasAddress = user.address && (user.address.street || user.address.city || user.address.state || user.address.pincode);
-  if (!hasAddress) {
+  const hasAddress = user.addresses && user.addresses.length > 0;
+  if (!hasAddress && shippingAddress) {
+    user.addresses.push({ label: 'Home', ...shippingAddress, isDefault: true });
     user.address = { ...user.address, ...shippingAddress };
     await user.save();
   }
 }
 
 router.post('/', protect, async (req, res) => {
-  const { items, shippingAddress, phone, deliveryLocation } = req.body;
+  const { items, shippingAddress, phone, deliveryLocation, deliveryMethod, pickupStore } = req.body;
   if (!items || items.length === 0) return res.status(400).json({ message: 'Cart is empty' });
-  if (!shippingAddress || !phone) return res.status(400).json({ message: 'Shipping details required' });
+  if (deliveryMethod === 'pickup') {
+    if (!pickupStore) return res.status(400).json({ message: 'Pickup store required' });
+  } else {
+    if (!shippingAddress || !phone) return res.status(400).json({ message: 'Shipping details required' });
+  }
 
   let subtotal = 0, totalMrp = 0;
   const orderItems = [];
@@ -69,41 +79,47 @@ router.post('/', protect, async (req, res) => {
     });
   }
 
-  const deliveryCharge = subtotal <= FREE_DELIVERY_THRESHOLD ? DELIVERY_CHARGE : 0;
+  const deliveryCharge = deliveryMethod === 'pickup' ? 0 : (subtotal <= FREE_DELIVERY_THRESHOLD ? DELIVERY_CHARGE : 0);
   const total = subtotal + deliveryCharge;
+  const store = deliveryMethod === 'pickup' ? STORES.find(s => s.id === pickupStore) || STORES[0] : null;
 
   const order = await Order.create({
     user: req.user._id,
     items: orderItems,
-    shippingAddress,
-    phone,
+    deliveryMethod: deliveryMethod || 'delivery',
+    shippingAddress: deliveryMethod === 'pickup' ? { street: store.address, city: '', state: '', pincode: '' } : shippingAddress,
+    phone: phone || '',
     subtotal,
     deliveryCharge,
     total,
     totalMrp,
     totalSavings: totalMrp - subtotal,
-    deliveryLocation,
+    deliveryLocation: deliveryMethod === 'delivery' ? deliveryLocation : null,
+    pickupStore: store ? { id: store.id, name: store.name, address: store.address, phone: store.phone, hours: store.hours } : null,
     paymentMethod: 'cod',
     paymentStatus: 'pending'
   });
 
-  await autoSaveAddress(req.user._id, shippingAddress);
+  if (deliveryMethod !== 'pickup') {
+    await autoSaveAddress(req.user._id, shippingAddress);
+  }
 
   try {
     const user = req.user;
     const itemsSummary = orderItems.map(i => `${i.name}×${i.quantity}`).join(', ');
     const shortId = order._id.toString().slice(-8).toUpperCase();
+    const methodLabel = deliveryMethod === 'pickup' ? '🧑‍🍳 Pickup' : '🚚 Delivery';
 
     await Notification.create({
       type: 'new_order',
-      title: '🆕 New Order Received!',
-      message: `${user.name} ordered ${itemsSummary} — ₹${total} | Phone: ${phone} | Address: ${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.pincode}`,
+      title: `🆕 New ${methodLabel} Order!`,
+      message: `${user.name} ordered ${itemsSummary} — ₹${total} | ${methodLabel}${deliveryMethod === 'pickup' ? ` at ${store?.name}` : ` | ${shippingAddress?.street}, ${shippingAddress?.city}`}`,
       link: `/admin/orders.html`,
       relatedId: order._id.toString(),
       priority: 'high'
     });
 
-    const smsMsg = `New Order #${shortId}: ${user.name} ordered ${itemsSummary} Total: Rs.${total}. Address: ${shippingAddress.street}, ${shippingAddress.city}-${shippingAddress.pincode}. Phone: ${phone}`;
+    const smsMsg = `New Order #${shortId}: ${user.name} ordered ${itemsSummary} Total: Rs.${total}. ${methodLabel}. Phone: ${phone}`;
     sendSmsNotification(smsMsg);
   } catch (notifErr) {
     console.log('Notification creation failed:', notifErr.message);

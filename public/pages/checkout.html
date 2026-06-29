@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 </head>
 <body class="bg-slate-50 min-h-screen">
   <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
@@ -29,50 +28,91 @@
     <div class="grid md:grid-cols-5 gap-6">
       <div class="md:col-span-3 order-2 md:order-1">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6">
-          <h2 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">📦 Shipping Details</h2>
-          <form id="checkout-form" class="space-y-4">
-            <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">Phone Number</label><input type="tel" id="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="10-digit mobile number"></div>
-            <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">Street / Area</label><input type="text" id="street" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="House no., street, locality"></div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">City</label><input type="text" id="city" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="City"></div>
-              <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">State</label><input type="text" id="state" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="State"></div>
-              <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">Pincode</label><input type="text" id="pincode" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="6-digit" maxlength="6"></div>
+          <!-- Delivery Method Toggle -->
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">📦 Delivery Method</h2>
+            <div class="grid grid-cols-2 gap-3" id="method-toggle">
+              <button type="button" data-method="delivery" class="method-btn active flex items-center gap-3 p-4 rounded-xl border-2 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center text-lg">🚚</div>
+                <div><div class="font-bold text-sm text-slate-800">Home Delivery</div><div class="text-xs text-slate-500">Deliver to your door</div></div>
+              </button>
+              <button type="button" data-method="pickup" class="method-btn flex items-center gap-3 p-4 rounded-xl border-2 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-energy-100 text-energy-600 flex items-center justify-center text-lg">🏪</div>
+                <div><div class="font-bold text-sm text-slate-800">Store Pickup</div><div class="text-xs text-slate-500">Pick up from store</div></div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Delivery Section -->
+          <div id="delivery-section">
+            <h2 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">📍 Delivery Address</h2>
+
+            <!-- Saved Addresses -->
+            <div id="saved-addresses-section" class="hidden mb-4">
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Saved Addresses</label>
+              <div id="saved-addresses-list" class="space-y-2"></div>
+              <button type="button" onclick="showNewAddressForm()" class="text-sm font-semibold text-brand-600 hover:text-brand-700 mt-2">+ Add New Address</button>
             </div>
 
-            <div class="border-t border-slate-100 pt-4 mt-2">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                <label class="block text-sm font-semibold text-slate-700">📍 Pin Your Location on Map</label>
-                <button type="button" onclick="detectLocation()" class="text-sm font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 w-full sm:w-auto">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                  Use My Location
-                </button>
-              </div>
-              <div id="map" class="w-full h-64 sm:h-72 md:h-64 rounded-xl border-2 border-slate-200 z-0"></div>
-              <p id="map-status" class="text-xs text-slate-400 mt-2 leading-relaxed">📍 Delivery area: <strong>Khanpur Gaon (843129)</strong> & nearby. Tap on the map to set your delivery location or use "Use My Location".</p>
-              <input type="hidden" id="lat" value="">
-              <input type="hidden" id="lng" value="">
-            </div>
+            <div id="new-address-form">
+              <form id="checkout-form" class="space-y-4">
+                <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">Phone Number</label><input type="tel" id="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="10-digit mobile number"></div>
+                <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">Street / Area</label><input type="text" id="street" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="House no., street, locality"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">City</label><input type="text" id="city" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="City"></div>
+                  <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">State</label><input type="text" id="state" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="State"></div>
+                  <div><label class="block text-sm font-semibold text-slate-700 mb-1.5">Pincode</label><input type="text" id="pincode" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition" placeholder="6-digit" maxlength="6"></div>
+                </div>
 
-            <div class="border-t border-slate-100 pt-4 mt-2">
-              <h3 class="text-sm font-bold text-slate-700 mb-3">📞 Contact to Order</h3>
-              <div class="p-4 rounded-xl bg-brand-50 border-2 border-brand-200">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center text-xl shrink-0">📞</div>
-                  <div>
-                    <p class="text-sm font-bold text-slate-800">Call or WhatsApp</p>
-                    <a href="tel:9341782080" class="text-lg font-extrabold text-brand-600 hover:text-brand-700">9341782080</a>
-                    <p class="text-xs text-slate-500 mt-0.5">Tell us your order & we'll deliver!</p>
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" onclick="autoDetectAddress()" class="text-sm font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Auto Detect
+                  </button>
+                  <button type="button" onclick="document.getElementById('save-addr-check').classList.toggle('hidden')" class="text-sm font-semibold text-slate-600 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                    💾 Save Address
+                  </button>
+                </div>
+                <div id="save-addr-check" class="hidden flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
+                  <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" id="save-address-checkbox" checked class="rounded border-slate-300 text-brand-600"> Save this address to my account</label>
+                </div>
+
+                <div class="border-t border-slate-100 pt-4 mt-2">
+                  <div class="flex items-center justify-between mb-3">
+                    <label class="block text-sm font-semibold text-slate-700">📍 Pin Your Location on Map</label>
+                    <button type="button" onclick="detectLocation()" class="text-sm font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      Use My Location
+                    </button>
                   </div>
+                  <div id="map" class="w-full h-56 sm:h-64 rounded-xl border-2 border-slate-200 z-0"></div>
+                  <p id="map-status" class="text-xs text-slate-400 mt-2 leading-relaxed">📍 Tap on the map to set your delivery location or use "Use My Location".</p>
+                  <input type="hidden" id="lat" value="">
+                  <input type="hidden" id="lng" value="">
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Pickup Section -->
+          <div id="pickup-section" class="hidden">
+            <h2 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">🏪 Pickup from Store</h2>
+            <div id="pickup-stores" class="space-y-3"></div>
+            <div class="mt-4 p-4 rounded-xl bg-brand-50 border-2 border-brand-200">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center text-xl shrink-0">📞</div>
+                <div>
+                  <p class="text-sm font-bold text-slate-800">Questions? Call us</p>
+                  <a href="tel:9341782080" class="text-lg font-extrabold text-brand-600 hover:text-brand-700">9341782080</a>
                 </div>
               </div>
-              <p class="text-xs text-slate-400 mt-3 text-center">Cash on Delivery available. Pay when you receive.</p>
             </div>
+          </div>
 
-            <button type="submit" id="place-order-btn" class="w-full bg-energy-500 hover:bg-energy-600 text-white font-bold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2 mt-2">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              <span id="btn-text">Place Order (Cash on Delivery)</span>
-            </button>
-          </form>
+          <button type="submit" id="place-order-btn" class="w-full bg-energy-500 hover:bg-energy-600 text-white font-bold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2 mt-6">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span id="btn-text">Place Order</span>
+          </button>
         </div>
       </div>
 
@@ -88,15 +128,14 @@
             <div class="flex justify-between text-lg font-extrabold border-t border-slate-200 pt-2 mt-2"><span>Total</span><span id="checkout-total" class="text-brand-700">₹0</span></div>
           </div>
           <div id="payment-info" class="mt-4 p-3 bg-brand-50 rounded-xl text-xs text-brand-700 flex items-start gap-2">
-            <span>💵</span><span>Pay with <strong>Cash on Delivery</strong> when your order arrives. Call <a href="tel:9341782080" class="font-bold underline">9341782080</a> for orders.</span>
+            <span>💵</span><span>Pay with <strong>Cash on Delivery</strong> when your order arrives.</span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Floating WhatsApp -->
-  <a href="https://wa.me/919341782080?text=Hi!%20I%20want%20to%20order%20from%20Mahenoor%20Kirana" target="_blank" class="whatsapp-float" title="Order on WhatsApp" aria-label="Chat on WhatsApp">
+  <a href="https://wa.me/919341782080?text=Hi!%20I%20want%20to%20order%20from%20Mahenoor%20Kirana" target="_blank" class="whatsapp-float" title="Order on WhatsApp">
     <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   </a>
 
@@ -105,21 +144,18 @@
   <script>
     const KHANPUR_LAT = 25.5954;
     const KHANPUR_LNG = 85.6677;
-    let map, marker;
+    let map, marker, stores = [], currentMethod = 'delivery', selectedAddrId = null;
 
     function initMap(lat = KHANPUR_LAT, lng = KHANPUR_LNG) {
       if (map) { map.setView([lat, lng], 13); return; }
       map = L.map('map', { zoomControl: true }).setView([lat, lng], 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>',
-        maxZoom: 19
+        attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>', maxZoom: 19
       }).addTo(map);
-
       map.on('click', function (e) {
         placeMarker(e.latlng.lat, e.latlng.lng);
         reverseGeocode(e.latlng.lat, e.latlng.lng);
       });
-
       setTimeout(() => map.invalidateSize(), 300);
     }
 
@@ -149,10 +185,10 @@
           const road = addr.road || '';
           const suburb = addr.suburb || addr.neighbourhood || '';
           const streetVal = [suburb, road].filter(Boolean).join(', ');
-          if (city && document.getElementById('city').value === '') document.getElementById('city').value = city;
-          if (state && document.getElementById('state').value === '') document.getElementById('state').value = state;
-          if (pincode && document.getElementById('pincode').value === '') document.getElementById('pincode').value = pincode;
-          if (streetVal && document.getElementById('street').value === '') document.getElementById('street').value = streetVal;
+          if (city) document.getElementById('city').value = city;
+          if (state) document.getElementById('state').value = state;
+          if (pincode) document.getElementById('pincode').value = pincode;
+          if (streetVal) document.getElementById('street').value = streetVal;
           status.textContent = `📍 ${streetVal ? streetVal + ', ' : ''}${city}, ${state} ${pincode}`;
           status.className = 'text-xs text-emerald-600 font-medium mt-2';
         }
@@ -162,13 +198,13 @@
       }
     }
 
-    function detectLocation() {
+    async function autoDetectAddress() {
       const status = document.getElementById('map-status');
-      status.textContent = 'Detecting your location...';
+      status.textContent = 'Auto-detecting your address...';
       status.className = 'text-xs text-slate-400 mt-2';
       initMap();
 
-      function onLocation(lat, lng) {
+      function fillFromCoords(lat, lng) {
         initMap(lat, lng);
         placeMarker(lat, lng);
         reverseGeocode(lat, lng);
@@ -176,151 +212,262 @@
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          (pos) => onLocation(pos.coords.latitude, pos.coords.longitude),
-          () => {
-            status.textContent = 'Trying IP-based location...';
-            status.className = 'text-xs text-slate-400 mt-2';
-            fetch('https://ipapi.co/json/').then(r => r.json()).then(d => {
-              if (d && d.latitude && d.longitude) {
-                onLocation(parseFloat(d.latitude), parseFloat(d.longitude));
-              } else {
-                throw new Error('No IP location data');
-              }
-            }).catch(() => {
-              fetch('https://ip-api.com/json/').then(r => r.json()).then(d => {
-                if (d && d.lat && d.lon) {
-                  onLocation(parseFloat(d.lat), parseFloat(d.lon));
-                } else {
-                  throw new Error('No IP location data');
-                }
-              }).catch(() => {
-                status.textContent = 'Could not detect location. Tap on the map to set it manually.';
-                status.className = 'text-xs text-amber-500 mt-2';
-              });
-            });
-          },
-          { enableHighAccuracy: false, timeout: 15000 }
+          (pos) => fillFromCoords(pos.coords.latitude, pos.coords.longitude),
+          () => ipFallback(status),
+          { enableHighAccuracy: true, timeout: 10000 }
         );
       } else {
-        status.textContent = 'Trying IP-based location...';
-        status.className = 'text-xs text-slate-400 mt-2';
-        fetch('https://ipapi.co/json/').then(r => r.json()).then(d => {
-          if (d && d.latitude && d.longitude) {
-            onLocation(parseFloat(d.latitude), parseFloat(d.longitude));
-          }
-        }).catch(() => {
-          status.textContent = 'Could not detect location. Tap on the map to set it manually.';
-          status.className = 'text-xs text-amber-500 mt-2';
-        });
+        ipFallback(status);
       }
     }
 
-    function prefillLocation() {
+    async function ipFallback(status) {
+      if (status) status.textContent = 'Trying IP-based location...';
       try {
-        const loc = JSON.parse(localStorage.getItem('deliveryLocation'));
-        if (loc) {
-          if (loc.city) document.getElementById('city').value = loc.city;
-          if (loc.state) document.getElementById('state').value = loc.state;
-          if (loc.pincode) document.getElementById('pincode').value = loc.pincode;
+        const res = await fetch('https://ipapi.co/json/');
+        const d = await res.json();
+        if (d && d.latitude && d.longitude) {
+          const lat = parseFloat(d.latitude), lng = parseFloat(d.longitude);
+          initMap(lat, lng);
+          placeMarker(lat, lng);
+          reverseGeocode(lat, lng);
+          return;
         }
-        const user = getUser();
-        if (user && user.address) {
-          if (user.address.street && !document.getElementById('street').value) document.getElementById('street').value = user.address.street;
-          if (user.address.city && !document.getElementById('city').value) document.getElementById('city').value = user.address.city;
-          if (user.address.state && !document.getElementById('state').value) document.getElementById('state').value = user.address.state;
-          if (user.address.pincode && !document.getElementById('pincode').value) document.getElementById('pincode').value = user.address.pincode;
-        }
-        if (user && user.phone && !document.getElementById('phone').value) document.getElementById('phone').value = user.phone;
       } catch {}
+      try {
+        const res = await fetch('https://ip-api.com/json/');
+        const d = await res.json();
+        if (d && d.lat && d.lon) {
+          initMap(parseFloat(d.lat), parseFloat(d.lon));
+          placeMarker(parseFloat(d.lat), parseFloat(d.lon));
+          reverseGeocode(parseFloat(d.lat), parseFloat(d.lon));
+          return;
+        }
+      } catch {}
+      if (status) { status.textContent = 'Could not detect location. Tap on the map to set it manually.'; status.className = 'text-xs text-amber-500 mt-2'; }
+    }
+
+    function detectLocation() { autoDetectAddress(); }
+
+    function switchMethod(method) {
+      currentMethod = method;
+      document.querySelectorAll('.method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === method));
+      document.getElementById('delivery-section').classList.toggle('hidden', method !== 'delivery');
+      document.getElementById('pickup-section').classList.toggle('hidden', method !== 'pickup');
+      updateSummary();
+    }
+
+    function renderStores(storeList) {
+      const container = document.getElementById('pickup-stores');
+      container.innerHTML = storeList.map((s, i) => `
+        <label class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${i === 0 ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-slate-300'}">
+          <input type="radio" name="pickup-store" value="${s.id}" ${i === 0 ? 'checked' : ''} class="mt-1 text-brand-600" onchange="updateSummary()">
+          <div class="flex-1">
+            <div class="font-bold text-sm text-slate-800">${s.name}</div>
+            <div class="text-xs text-slate-500 mt-0.5">📍 ${s.address}</div>
+            <div class="text-xs text-slate-500">📞 ${s.phone}</div>
+            <div class="text-xs text-slate-500">🕐 ${s.hours}</div>
+            ${s.pickupNote ? `<div class="text-xs font-semibold text-energy-600 mt-1">✅ ${s.pickupNote}</div>` : ''}
+          </div>
+        </label>
+      `).join('');
+    }
+
+    function renderSavedAddresses(addresses) {
+      const section = document.getElementById('saved-addresses-section');
+      const list = document.getElementById('saved-addresses-list');
+      if (!addresses || addresses.length === 0) { section.classList.add('hidden'); return; }
+      section.classList.remove('hidden');
+      list.innerHTML = addresses.map((a, i) => `
+        <label class="flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition ${a.isDefault ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-slate-300'}">
+          <input type="radio" name="saved-address" data-idx="${i}" data-id="${a._id}" ${a.isDefault ? 'checked' : ''} onchange="selectSavedAddress('${a._id}')" class="mt-1 text-brand-600">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full ${a.label === 'Home' ? 'bg-brand-100 text-brand-700' : a.label === 'Work' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}">${a.label}</span>${a.isDefault ? '<span class="text-xs text-brand-600 font-semibold">Default</span>' : ''}</div>
+            <div class="text-sm text-slate-700 mt-0.5">${a.street}, ${a.city}, ${a.state} ${a.pincode}</div>
+          </div>
+        </label>
+      `).join('');
+      const def = addresses.find(a => a.isDefault) || addresses[0];
+      if (def) selectSavedAddress(def._id);
+    }
+
+    function selectSavedAddress(id) {
+      selectedAddrId = id;
+      const user = getUser();
+      const addr = (user.addresses || []).find(a => a._id === id);
+      if (addr) {
+        document.getElementById('street').value = addr.street || '';
+        document.getElementById('city').value = addr.city || '';
+        document.getElementById('state').value = addr.state || '';
+        document.getElementById('pincode').value = addr.pincode || '';
+        document.getElementById('phone').value = user.phone || document.getElementById('phone').value;
+        if (addr.lat && addr.lng) {
+          initMap(addr.lat, addr.lng);
+          placeMarker(addr.lat, addr.lng);
+        }
+      }
+    }
+
+    function showNewAddressForm() {
+      selectedAddrId = null;
+      document.querySelectorAll('input[name="saved-address"]').forEach(r => r.checked = false);
+      document.getElementById('street').value = '';
+      document.getElementById('city').value = '';
+      document.getElementById('state').value = '';
+      document.getElementById('pincode').value = '';
     }
 
     function getCartItems() {
       return getCart().map(i => ({ product: i.product, quantity: i.quantity }));
     }
 
+    function updateSummary() {
+      const cart = getCart();
+      let subtotal = 0, totalMrp = 0;
+      const itemsEl = document.getElementById('checkout-items');
+      const allProducts = window._checkoutProducts || [];
+      itemsEl.innerHTML = cart.map(item => {
+        const p = allProducts.find(x => x._id === item.product);
+        if (!p) return '';
+        subtotal += p.sellingPrice * item.quantity;
+        totalMrp += p.mrp * item.quantity;
+        return `<div class="flex items-center gap-3 text-sm"><div class="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0" style="background:${p.category === 'Cold Drinks' ? '#ffedd5' : '#d1fae5'}">${p.category === 'Cold Drinks' ? '🥤' : '🍚'}</div><div class="flex-1 min-w-0"><p class="font-medium text-slate-800 truncate">${p.name}</p><p class="text-xs text-slate-400">${p.unit} × ${item.quantity}</p></div><span class="font-bold shrink-0">₹${p.sellingPrice * item.quantity}</span></div>`;
+      }).join('');
+
+      _checkoutSubtotal = subtotal;
+      _checkoutMrp = totalMrp;
+
+      const savings = totalMrp - subtotal;
+      const deliveryCharge = currentMethod === 'pickup' ? 0 : (subtotal <= 100 ? 20 : 0);
+      const grandTotal = subtotal + deliveryCharge;
+
+      document.getElementById('checkout-mrp').textContent = `₹${totalMrp}`;
+      document.getElementById('checkout-savings').textContent = `-₹${savings}`;
+      document.getElementById('checkout-subtotal').textContent = `₹${subtotal}`;
+      document.getElementById('checkout-delivery').textContent = deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge}`;
+      document.getElementById('checkout-total').textContent = `₹${grandTotal}`;
+      const chargeRow = document.getElementById('delivery-charge-row');
+      if (currentMethod === 'pickup') {
+        chargeRow.querySelector('span:first-child').innerHTML = 'Pickup <span class="text-emerald-600 font-semibold text-xs">(Free)</span>';
+      } else if (deliveryCharge === 0) {
+        chargeRow.querySelector('span:first-child').innerHTML = 'Delivery Charge <span class="text-emerald-600 font-semibold text-xs">Free</span>';
+      } else {
+        chargeRow.querySelector('span:first-child').textContent = 'Delivery Charge';
+      }
+
+      const btnText = document.getElementById('btn-text');
+      if (currentMethod === 'pickup') {
+        btnText.textContent = 'Place Order (Store Pickup)';
+      } else {
+        btnText.textContent = 'Place Order (Cash on Delivery)';
+      }
+    }
+
+    let _checkoutSubtotal = 0, _checkoutMrp = 0, _checkoutProducts = [];
+
     async function loadCheckout() {
       const cart = getCart();
-      prefillLocation();
       if (cart.length === 0) { window.location.href = '/'; return; }
+
+      if (!isLoggedIn()) { window.location.href = '/pages/login.html'; return; }
+
+      try {
+        const cfg = await (await fetch('/api/config')).json();
+        stores = cfg.stores || [];
+        renderStores(stores);
+      } catch {}
+
+      try {
+        const userData = await apiCall('/auth/me');
+        const user = userData.user;
+        localStorage.setItem('user', JSON.stringify(user));
+        renderSavedAddresses(user.addresses || []);
+        if (user.phone) document.getElementById('phone').value = user.phone;
+      } catch {}
 
       try {
         const allIds = cart.map(i => i.product);
         const res = await apiCall('/products?limit=100' + allIds.map(id => `&id=${id}`).join(''));
-        const allProducts = res.products || [];
+        _checkoutProducts = res.products || [];
+        window._checkoutProducts = _checkoutProducts;
+        updateSummary();
+      } catch {}
 
-        let subtotal = 0, totalMrp = 0;
-        const itemsEl = document.getElementById('checkout-items');
+      initMap();
 
-        itemsEl.innerHTML = cart.map(item => {
-          const p = allProducts.find(x => x._id === item.product);
-          if (!p) return '';
-          subtotal += p.sellingPrice * item.quantity;
-          totalMrp += p.mrp * item.quantity;
-          return `<div class="flex items-center gap-3 text-sm"><div class="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0" style="background:${p.category === 'Cold Drinks' ? '#ffedd5' : '#d1fae5'}">${p.category === 'Cold Drinks' ? '🥤' : '🍚'}</div><div class="flex-1 min-w-0"><p class="font-medium text-slate-800 truncate">${p.name}</p><p class="text-xs text-slate-400">${p.unit} × ${item.quantity}</p></div><span class="font-bold shrink-0">₹${p.sellingPrice * item.quantity}</span></div>`;
-        }).join('');
-
-        const savings = totalMrp - subtotal;
-        const deliveryCharge = subtotal <= 500 ? 20 : 0;
-        const grandTotal = subtotal + deliveryCharge;
-
-        document.getElementById('checkout-mrp').textContent = `₹${totalMrp}`;
-        document.getElementById('checkout-savings').textContent = `-₹${savings}`;
-        document.getElementById('checkout-subtotal').textContent = `₹${subtotal}`;
-        document.getElementById('checkout-delivery').textContent = deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge}`;
-        document.getElementById('checkout-total').textContent = `₹${grandTotal}`;
-        if (deliveryCharge === 0) {
-          document.getElementById('delivery-charge-row').querySelector('span:first-child').innerHTML = 'Delivery Charge <span class="text-emerald-600 font-semibold text-xs">Free</span>';
+      const pincodeInput = document.getElementById('pincode');
+      pincodeInput.addEventListener('input', function () {
+        if (this.value.length === 6) {
+          const loc = getSavedLocation();
+          if (loc && loc.pincode === this.value) {
+            this.value = loc.pincode;
+          }
         }
+      });
 
-        initMap();
+      document.getElementById('place-order-btn').addEventListener('click', async () => {
+        if (!isLoggedIn()) { window.location.href = '/pages/login.html'; return; }
+        const alert = document.getElementById('alert');
+        const btn = document.getElementById('place-order-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Placing Order...';
 
-        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          if (!isLoggedIn()) { window.location.href = '/pages/login.html'; return; }
-          const alert = document.getElementById('alert');
-          const lat = document.getElementById('lat').value;
-          const lng = document.getElementById('lng').value;
-          const deliveryLocation = lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null;
-          const formData = {
-            phone: document.getElementById('phone').value,
-            shippingAddress: {
+        try {
+          const payload = { items: getCartItems(), deliveryMethod: currentMethod };
+
+          if (currentMethod === 'pickup') {
+            const selectedStore = document.querySelector('input[name="pickup-store"]:checked');
+            if (!selectedStore) { throw new Error('Please select a pickup store'); }
+            payload.pickupStore = selectedStore.value;
+            payload.phone = getUser()?.phone || '';
+          } else {
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+            payload.phone = document.getElementById('phone').value;
+            payload.shippingAddress = {
               street: document.getElementById('street').value,
               city: document.getElementById('city').value,
               state: document.getElementById('state').value,
               pincode: document.getElementById('pincode').value
-            },
-            deliveryLocation
-          };
+            };
+            if (lat && lng) payload.deliveryLocation = { lat: parseFloat(lat), lng: parseFloat(lng) };
 
-          const btn = e.target.querySelector('button[type="submit"]');
-          btn.disabled = true;
-          btn.innerHTML = '<span class="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Placing Order...';
-          try {
-            await apiCall('/orders', {
-              method: 'POST',
-              body: JSON.stringify({
-                items: getCartItems(),
-                phone: formData.phone,
-                shippingAddress: formData.shippingAddress,
-                deliveryLocation: formData.deliveryLocation
-              })
-            });
-            localStorage.removeItem('cart');
-            updateCartCount();
-            alert.className = 'block p-4 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200';
-            alert.textContent = '🎉 Order placed successfully! Redirecting...';
-            setTimeout(() => window.location.href = '/pages/my-orders.html', 1500);
-          } catch (err) {
-            btn.disabled = false;
-            btn.innerHTML = '<span id="btn-text">Place Order (Cash on Delivery)</span>';
-            alert.className = 'block p-4 rounded-xl text-sm font-medium bg-red-50 text-red-600 border border-red-200';
-            alert.textContent = err.message;
+            if (!payload.phone) throw new Error('Phone number required');
+            if (!payload.shippingAddress.street || !payload.shippingAddress.city || !payload.shippingAddress.pincode) {
+              throw new Error('Please fill in all address fields');
+            }
+
+            const saveAddr = document.getElementById('save-address-checkbox');
+            if (saveAddr && saveAddr.checked) {
+              try {
+                await apiCall('/auth/addresses', {
+                  method: 'POST',
+                  body: JSON.stringify({ label: 'Home', ...payload.shippingAddress, lat: payload.deliveryLocation?.lat, lng: payload.deliveryLocation?.lng })
+                });
+              } catch {}
+            }
           }
-        });
-      } catch (err) {
-        document.getElementById('checkout-items').innerHTML = `<p class="text-red-500 text-sm">${err.message}</p>`;
-      }
+
+          await apiCall('/orders', { method: 'POST', body: JSON.stringify(payload) });
+          localStorage.removeItem('cart');
+          updateCartCount();
+          alert.className = 'block p-4 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200';
+          alert.textContent = '🎉 Order placed successfully! Redirecting...';
+          setTimeout(() => window.location.href = '/pages/my-orders.html', 1500);
+        } catch (err) {
+          btn.disabled = false;
+          btn.innerHTML = '<span id="btn-text">Place Order</span>';
+          alert.className = 'block p-4 rounded-xl text-sm font-medium bg-red-50 text-red-600 border border-red-200';
+          alert.textContent = err.message;
+        }
+      });
+
+      document.getElementById('method-toggle').addEventListener('click', (e) => {
+        const btn = e.target.closest('.method-btn');
+        if (btn) switchMethod(btn.dataset.method);
+      });
     }
+
     document.addEventListener('DOMContentLoaded', loadCheckout);
   </script>
 </body>

@@ -10,7 +10,11 @@ const router = express.Router();
 router.use(protect, adminOnly);
 
 router.get('/dashboard', async (req, res) => {
-  const [totalProducts, totalOrders, totalUsers, pendingOrders, lowStockItems, revenueResult] = await Promise.all([
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+
+  const [totalProducts, totalOrders, totalUsers, pendingOrders, lowStockItems, revenueResult, todaySalesResult, weeklySalesResult, monthlySalesResult, topProductResult] = await Promise.all([
     Product.countDocuments(),
     Order.countDocuments(),
     User.countDocuments({ role: 'user' }),
@@ -19,11 +23,34 @@ router.get('/dashboard', async (req, res) => {
     Order.aggregate([
       { $match: { status: { $nin: ['cancelled'] } } },
       { $group: { _id: null, total: { $sum: { $ifNull: ['$total', '$subtotal'] } } } }
+    ]),
+    Order.aggregate([
+      { $match: { createdAt: { $gte: todayStart }, status: { $nin: ['cancelled'] } } },
+      { $group: { _id: null, total: { $sum: { $ifNull: ['$total', '$subtotal'] } } } }
+    ]),
+    Order.aggregate([
+      { $match: { createdAt: { $gte: weekAgo }, status: { $nin: ['cancelled'] } } },
+      { $group: { _id: null, total: { $sum: { $ifNull: ['$total', '$subtotal'] } } } }
+    ]),
+    Order.aggregate([
+      { $match: { createdAt: { $gte: monthStart }, status: { $nin: ['cancelled'] } } },
+      { $group: { _id: null, total: { $sum: { $ifNull: ['$total', '$subtotal'] } } } }
+    ]),
+    Order.aggregate([
+      { $match: { status: { $nin: ['cancelled'] } } },
+      { $unwind: '$items' },
+      { $group: { _id: '$items.product', name: { $first: '$items.name' }, totalQty: { $sum: '$items.quantity' } } },
+      { $sort: { totalQty: -1 } },
+      { $limit: 1 }
     ])
   ]);
   const totalRevenue = revenueResult[0]?.total || 0;
+  const todaySales = todaySalesResult[0]?.total || 0;
+  const weeklySales = weeklySalesResult[0]?.total || 0;
+  const monthlySales = monthlySalesResult[0]?.total || 0;
+  const topSellingProduct = topProductResult[0] ? { name: topProductResult[0].name, totalQty: topProductResult[0].totalQty } : null;
   const outOfStock = await Product.countDocuments({ stock: 0, isAvailable: true });
-  res.json({ totalProducts, totalOrders, totalUsers, totalRevenue, pendingOrders, lowStockItems, outOfStock });
+  res.json({ totalProducts, totalOrders, totalUsers, totalRevenue, pendingOrders, lowStockItems, outOfStock, todaySales, weeklySales, monthlySales, topSellingProduct });
 });
 
 router.get('/products', async (req, res) => {
@@ -58,7 +85,14 @@ router.get('/orders', async (req, res) => {
   if (status) query.status = status;
   const total = await Order.countDocuments(query);
   const orders = await Order.find(query).populate('user', 'name email phone address').sort({ createdAt: -1 }).skip((Number(page) - 1) * Number(limit)).limit(Number(limit));
-  res.json({ orders, total, pages: Math.ceil(total / Number(limit)) });
+
+  const counts = await Order.aggregate([
+    { $group: { _id: '$status', count: { $sum: 1 } } }
+  ]);
+  const countMap = { pending: 0, confirmed: 0, dispatched: 0, delivered: 0, cancelled: 0 };
+  counts.forEach(c => { if (c._id) countMap[c._id] = c.count; });
+
+  res.json({ orders, total, pages: Math.ceil(total / Number(limit)), counts: countMap });
 });
 
 router.put('/orders/:id/status', async (req, res) => {
@@ -102,6 +136,13 @@ router.put('/orders/:id/status', async (req, res) => {
 router.get('/users', async (req, res) => {
   const users = await User.find({ role: 'user' }).sort({ createdAt: -1 });
   res.json({ users });
+});
+
+router.delete('/users/:id', async (req, res) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  await Order.deleteMany({ user: req.params.id });
+  res.json({ message: 'User and their orders deleted' });
 });
 
 router.get('/users/stats', async (req, res) => {

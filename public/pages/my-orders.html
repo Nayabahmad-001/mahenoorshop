@@ -199,7 +199,9 @@
               </div>
             </div>
             <div class="mt-4 space-y-2">${o.items.map(i => `<div class="flex items-center gap-3 text-sm"><div class="w-10 h-10 rounded-lg shrink-0 overflow-hidden bg-slate-100">${i.image ? `<img src="${i.image}" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=\\'w-10 h-10 flex items-center justify-center text-sm\\'>📦</div>'">` : '<div class="w-10 h-10 flex items-center justify-center text-sm">📦</div>'}</div><div class="flex-1 min-w-0"><p class="font-medium text-slate-800 text-sm truncate">${i.name}</p><p class="text-xs text-slate-400">Qty: ${i.quantity} × ₹${i.sellingPrice}</p></div><span class="font-semibold shrink-0 text-sm">₹${i.sellingPrice * i.quantity}</span></div>`).join('')}</div>
-            ${o.shippingAddress ? `<div class="mt-3 text-xs text-slate-400 flex items-start gap-1.5"><span>📍</span><span>${o.shippingAddress.street}, ${o.shippingAddress.city}, ${o.shippingAddress.state} ${o.shippingAddress.pincode}${o.deliveryLocation?.lat ? ` <a href="https://www.google.com/maps?q=${o.deliveryLocation.lat},${o.deliveryLocation.lng}" target="_blank" class="text-blue-600 hover:underline font-medium">(View on Map)</a>` : ''}</span></div>` : ''}
+            ${o.deliveryMethod === 'pickup'
+            ? `<div class="mt-3 p-3 rounded-xl bg-energy-50 border-2 border-energy-200 flex items-start gap-3"><div class="w-10 h-10 rounded-full bg-energy-500 text-white flex items-center justify-center text-lg shrink-0">🏪</div><div><p class="font-bold text-sm text-slate-800">${o.pickupStore?.name || 'Store Pickup'}</p><p class="text-xs text-slate-500">${o.pickupStore?.address || ''}</p><p class="text-xs text-slate-500">🕐 ${o.pickupStore?.hours || '8:00 AM - 10:00 PM'}</p></div></div>`
+            : (o.shippingAddress ? `<div class="mt-3 text-xs text-slate-400 flex items-start gap-1.5"><span>📍</span><span>${o.shippingAddress.street}, ${o.shippingAddress.city}, ${o.shippingAddress.state} ${o.shippingAddress.pincode}${o.deliveryLocation?.lat ? ` <a href="https://www.google.com/maps?q=${o.deliveryLocation.lat},${o.deliveryLocation.lng}" target="_blank" class="text-blue-600 hover:underline font-medium">(View on Map)</a>` : ''}</span></div>` : '')}
             ${o.status === 'dispatched' || o.status === 'delivered' ? `
             <div class="mt-3 border rounded-xl overflow-hidden ${o.status === 'delivered' ? 'border-emerald-200' : 'border-blue-200'}">
               <div class="p-4 ${o.status === 'delivered' ? 'bg-emerald-50' : 'bg-blue-50'}">
@@ -214,6 +216,7 @@
               </div>
               ${o.deliveryLocation?.lat ? `<div id="map-${o._id}" class="w-full h-48 sm:h-56"></div>` : ''}
             </div>` : ''}
+            ${o.status === 'dispatched' || o.status === 'delivered' ? `<div class="mt-3"><a href="/tracking/${o._id}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition">📍 Track Order</a></div>` : ''}
             ${renderTimeline(o.status, o.statusHistory)}
             <div class="feedback-section">${o.status === 'delivered' ? renderFeedbackForm(o._id, fb) : ''}</div>
           </div>`;

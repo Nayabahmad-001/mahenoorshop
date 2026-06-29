@@ -37,6 +37,16 @@ async function loadDashboard() {
     document.getElementById('stat-revenue').textContent = `₹${d.totalRevenue.toLocaleString('en-IN')}`;
     document.getElementById('stat-pending').textContent = d.pendingOrders;
     document.getElementById('stat-outofstock').textContent = d.outOfStock;
+    document.getElementById('stat-today-sales').textContent = `₹${d.todaySales.toLocaleString('en-IN')}`;
+    document.getElementById('stat-weekly-sales').textContent = `₹${d.weeklySales.toLocaleString('en-IN')}`;
+    document.getElementById('stat-monthly-sales').textContent = `₹${d.monthlySales.toLocaleString('en-IN')}`;
+    const topEl = document.getElementById('stat-top-product');
+    if (d.topSellingProduct) {
+      topEl.textContent = d.topSellingProduct.name.length > 18 ? d.topSellingProduct.name.slice(0, 18) + '…' : d.topSellingProduct.name;
+      topEl.title = `${d.topSellingProduct.name} (${d.topSellingProduct.totalQty} sold)`;
+    } else {
+      topEl.textContent = '—';
+    }
   } catch (err) { console.error(err); }
 
   try {
@@ -63,9 +73,10 @@ async function loadDashboard() {
         <td class="py-3 pr-4 text-xs text-slate-500">${u.email}</td>
         <td class="py-3 pr-4 text-sm text-slate-600">${u.phone || '-'}</td>
         <td class="py-3 pr-4"><span class="text-sm font-bold ${u.totalOrders > 0 ? 'text-brand-700' : 'text-slate-400'}">${u.totalOrders}</span></td>
-        <td class="py-3"><span class="text-sm font-semibold text-slate-700">₹${u.totalSpent.toLocaleString('en-IN')}</span></td>
+        <td class="py-3 pr-4"><span class="text-sm font-semibold text-slate-700">₹${u.totalSpent.toLocaleString('en-IN')}</span></td>
+        <td class="py-3"><button onclick="deleteUser('${u._id}','${u.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 text-xs font-semibold bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">Delete</button></td>
       </tr>
-    `).join('') : '<tr><td colspan="5" class="py-8 text-center text-slate-400">No customers yet</td></tr>';
+    `).join('') : '<tr><td colspan="6" class="py-8 text-center text-slate-400">No customers yet</td></tr>';
   } catch (err) { console.error(err); }
 }
 
@@ -183,13 +194,38 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+/* ===================== ORDER FILTERS ===================== */
+function initOrderFilters() {
+  const container = document.getElementById('status-filters');
+  if (!container) return;
+  container.addEventListener('click', e => {
+    const btn = e.target.closest('.status-filter');
+    if (!btn) return;
+    container.querySelectorAll('.status-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadOrders();
+  });
+}
+
+function updateOrderCounts(counts) {
+  if (!counts) return;
+  const all = Object.values(counts).reduce((a, b) => a + b, 0);
+  document.getElementById('count-all').textContent = all > 99 ? '99+' : all;
+  document.getElementById('count-pending').textContent = counts.pending || 0;
+  document.getElementById('count-confirmed').textContent = counts.confirmed || 0;
+  document.getElementById('count-dispatched').textContent = counts.dispatched || 0;
+  document.getElementById('count-delivered').textContent = counts.delivered || 0;
+  document.getElementById('count-cancelled').textContent = counts.cancelled || 0;
+}
+
 /* ===================== ORDERS ===================== */
 async function loadOrders() {
   if (!checkAdmin()) return;
-  const status = document.getElementById('filter-status')?.value || '';
-  const url = status ? `/admin/orders?status=${status}` : '/admin/orders';
+  const activeFilter = document.querySelector('.status-filter.active');
+  const status = activeFilter ? activeFilter.dataset.status : '';
   try {
-    const r = await apiCall(url);
+    const r = await apiCall(`/admin/orders${status ? `?status=${status}` : ''}`);
+    updateOrderCounts(r.counts);
     const tbody = document.getElementById('orders-tbody');
     const orders = r.orders || [];
     tbody.innerHTML = orders.map(o => {
@@ -224,12 +260,22 @@ async function loadOrders() {
       const partnerHtml = o.deliveryPartner?.name
         ? `<div class="text-xs"><div class="font-medium text-slate-700">${o.deliveryPartner.name}</div>${o.deliveryPartner.phone ? `<div class="text-slate-400">${o.deliveryPartner.phone}</div>` : ''}${o.deliveryPartner.liveLocationLink ? `<a href="${o.deliveryPartner.liveLocationLink}" target="_blank" class="text-blue-600 hover:underline">📍 Live</a>` : ''}</div>`
         : `<span class="text-xs text-slate-400">—</span>`;
-      const addressHtml = o.user?.address
+      const addressHtml = o.shippingAddress
         ? `<div class="text-xs text-slate-600 max-w-[160px]" title="${o.shippingAddress?.street || ''}, ${o.shippingAddress?.city || ''}">${o.shippingAddress?.street ? '<span class="font-medium">'+o.shippingAddress.street+'</span><br>' : ''}${o.shippingAddress?.city ? o.shippingAddress.city : ''}${o.shippingAddress?.pincode ? ' - '+o.shippingAddress.pincode : ''}</div>`
-        : `<span class="text-xs text-slate-400">${o.shippingAddress?.street || ''}, ${o.shippingAddress?.city || ''}</span>`;
-      return `<tr><td class="py-3 pr-4 font-medium text-xs">#${o._id.slice(-10).toUpperCase()}</td><td class="py-3 pr-4"><div class="font-medium text-sm">${o.user?.name || 'N/A'}</div><div class="text-xs text-slate-400">${o.user?.email || ''}</div></td><td class="py-3 pr-4 text-xs max-w-[160px]">${addressHtml}</td><td class="py-3 pr-4 text-sm">${o.phone}</td><td class="py-3 pr-4 min-w-[200px]">${itemsList}</td><td class="py-3 pr-4 text-sm font-medium text-slate-700">${totalQty}</td><td class="py-3 pr-4">${totalBlock}</td><td class="py-3 pr-4">${paymentBadge}</td><td class="py-3 pr-4"><span class="text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} capitalize">${o.status}</span></td><td class="py-3 pr-4">${partnerHtml}</td><td class="py-3 pr-4">${locationHtml}</td><td class="py-3 pr-4 text-xs text-slate-400">${new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td><td class="py-3"><select onchange="updateStatus('${o._id}', this.value)" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-brand-500"><option value="">Update</option><option value="confirmed">Confirmed</option><option value="dispatched">Dispatched</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td></tr>`;
+        : `<span class="text-xs text-slate-400">—</span>`;
+      const isPickup = o.deliveryMethod === 'pickup';
+      const methodHtml = isPickup
+        ? `<span class="text-xs font-semibold px-2 py-1 rounded-full bg-energy-100 text-energy-700">🏪 Pickup</span>`
+        : `<span class="text-xs font-semibold px-2 py-1 rounded-full bg-brand-100 text-brand-700">🚚 Delivery</span>`;
+      const trackingLink = o.status === 'dispatched' || o.status === 'delivered'
+        ? `<a href="/tracking/${o._id}" target="_blank" class="text-xs text-blue-600 hover:underline font-medium">📍 Track</a>`
+        : '';
+      const pickupInfo = isPickup && o.pickupStore
+        ? `<div class="text-xs"><div class="font-medium text-slate-700">${o.pickupStore.name}</div><div class="text-slate-400">${o.pickupStore.address}</div></div>`
+        : '';
+      return `<tr><td class="py-3 pr-4 font-medium text-xs">#${o._id.slice(-10).toUpperCase()}</td><td class="py-3 pr-4"><div class="font-medium text-sm">${o.user?.name || 'N/A'}</div><div class="text-xs text-slate-400">${o.user?.email || ''}</div></td><td class="py-3 pr-4">${methodHtml}${trackingLink ? '<br>' + trackingLink : ''}</td><td class="py-3 pr-4 text-xs max-w-[160px]">${isPickup ? pickupInfo : addressHtml}</td><td class="py-3 pr-4 text-sm">${o.phone || '-'}</td><td class="py-3 pr-4 min-w-[200px]">${itemsList}</td><td class="py-3 pr-4 text-sm font-medium text-slate-700">${totalQty}</td><td class="py-3 pr-4">${totalBlock}</td><td class="py-3 pr-4">${paymentBadge}</td><td class="py-3 pr-4"><span class="text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} capitalize">${o.status}</span></td><td class="py-3 pr-4">${isPickup ? '<span class="text-xs text-slate-400">—</span>' : partnerHtml}</td><td class="py-3 pr-4">${isPickup ? '<span class="text-xs text-slate-400">—</span>' : locationHtml}</td><td class="py-3 pr-4 text-xs text-slate-400">${new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td><td class="py-3"><select onchange="updateStatus('${o._id}', this.value)" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-brand-500"><option value="">Update</option><option value="confirmed">Confirmed</option><option value="dispatched">Dispatched</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td></tr>`;
     }).join('');
-  } catch (err) { document.getElementById('orders-tbody').innerHTML = `<tr><td colspan="12" class="py-8 text-center text-red-500">${err.message}</td></tr>`; }
+  } catch (err) { document.getElementById('orders-tbody').innerHTML = `<tr><td colspan="14" class="py-8 text-center text-red-500">${err.message}</td></tr>`; }
 }
 
 async function updateStatus(orderId, status) {
@@ -262,6 +308,17 @@ async function updateStatus(orderId, status) {
     if (res.deliveryOtp) alert(`OTP generated for this order: ${res.deliveryOtp}\nShare this OTP with the customer.`);
     loadOrders();
   } catch (err) { alert(err.message); }
+}
+
+/* ===================== DELETE USER ===================== */
+async function deleteUser(id, name) {
+  if (!confirm(`Delete user "${name}" and all their orders? This cannot be undone.`)) return;
+  try {
+    await apiCall(`/admin/users/${id}`, { method: 'DELETE' });
+    loadDashboard();
+  } catch (err) {
+    alert(err.message);
+  }
 }
 
 /* ===================== NOTIFICATIONS ===================== */
@@ -339,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     startNotifPolling();
   }
   if (window.location.pathname.includes('/admin/products.html')) loadProducts();
-  if (window.location.pathname.includes('/admin/orders.html')) loadOrders();
+  if (window.location.pathname.includes('/admin/orders.html')) { initOrderFilters(); loadOrders(); }
   /* Show notifications bell on all admin pages */
   if (document.getElementById('notif-btn')) startNotifPolling();
 });

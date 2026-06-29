@@ -27,7 +27,7 @@ function qtyBtn(productId, delta) {
 function showToast(msg, isError = false) {
   const t = document.createElement('div');
   t.className = 'toast';
-  if (isError) { t.style.background = '#dc2625'; }
+  if (isError) { t.style.background = '#dc2626'; }
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2500);

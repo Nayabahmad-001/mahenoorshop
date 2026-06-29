@@ -49,20 +49,35 @@
               </div>
             </div>
           </div>
-          <select id="filter-status" onchange="loadOrders()" class="px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-600 bg-white focus:outline-none focus:border-brand-500">
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="dispatched">Dispatched</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+        </div>
+      </div>
+
+      <!-- Status Filter Pills -->
+      <div class="flex flex-wrap gap-2 mb-6" id="status-filters">
+        <button class="status-filter active" data-status="">
+          All <span class="count" id="count-all">0</span>
+        </button>
+        <button class="status-filter pending" data-status="pending">
+          Pending <span class="count" id="count-pending">0</span>
+        </button>
+        <button class="status-filter confirmed" data-status="confirmed">
+          Confirmed <span class="count" id="count-confirmed">0</span>
+        </button>
+        <button class="status-filter dispatched" data-status="dispatched">
+          Dispatched <span class="count" id="count-dispatched">0</span>
+        </button>
+        <button class="status-filter delivered" data-status="delivered">
+          Delivered <span class="count" id="count-delivered">0</span>
+        </button>
+        <button class="status-filter cancelled" data-status="cancelled">
+          Cancelled <span class="count" id="count-cancelled">0</span>
+        </button>
       </div>
 
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead><tr class="text-left text-xs text-slate-500 uppercase tracking-wider"><th class="pb-3 pr-4">Order ID</th><th class="pb-3 pr-4">Customer</th><th class="pb-3 pr-4">Address</th><th class="pb-3 pr-4">Phone</th><th class="pb-3 pr-4">Items</th><th class="pb-3 pr-4">Qty</th><th class="pb-3 pr-4">Total</th><th class="pb-3 pr-4">Payment</th><th class="pb-3 pr-4">Status</th><th class="pb-3 pr-4">Delivery</th><th class="pb-3 pr-4">Location</th><th class="pb-3 pr-4">Date</th><th class="pb-3">Action</th></tr></thead>
+            <thead><tr class="text-left text-xs text-slate-500 uppercase tracking-wider"><th class="pb-3 pr-4">Order ID</th><th class="pb-3 pr-4">Customer</th><th class="pb-3 pr-4">Method</th><th class="pb-3 pr-4">Address</th><th class="pb-3 pr-4">Phone</th><th class="pb-3 pr-4">Items</th><th class="pb-3 pr-4">Qty</th><th class="pb-3 pr-4">Total</th><th class="pb-3 pr-4">Payment</th><th class="pb-3 pr-4">Status</th><th class="pb-3 pr-4">Delivery</th><th class="pb-3 pr-4">Location</th><th class="pb-3 pr-4">Date</th><th class="pb-3">Action</th></tr></thead>
             <tbody id="orders-tbody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>

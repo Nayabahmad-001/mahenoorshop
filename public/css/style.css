@@ -317,4 +317,81 @@ body > * { position: relative; z-index: 1; }
   background: rgba(255,255,255,0.7);
 }
 
+/* Status Filter Pills */
+.status-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  background: #f1f5f9;
+  color: #475569;
+}
+.status-filter:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.status-filter:active {
+  transform: scale(0.96);
+}
+.status-filter .count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background: rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+}
+
+/* Pill status colors - default state */
+.status-filter.pending { background: #fef3c7; color: #b45309; }
+.status-filter.confirmed { background: #dbeafe; color: #1d4ed8; }
+.status-filter.dispatched { background: #ede9fe; color: #7c3aed; }
+.status-filter.delivered { background: #d1fae5; color: #059669; }
+.status-filter.cancelled { background: #fee2e2; color: #dc2626; }
+
+/* Pill status colors - active state */
+.status-filter.active { background: #1e293b; color: white; border-color: #1e293b; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(30,41,59,0.25); }
+.status-filter.active.pending { background: #f59e0b; color: white; border-color: #f59e0b; box-shadow: 0 4px 14px rgba(245,158,11,0.35); }
+.status-filter.active.confirmed { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 14px rgba(59,130,246,0.35); }
+.status-filter.active.dispatched { background: #8b5cf6; color: white; border-color: #8b5cf6; box-shadow: 0 4px 14px rgba(139,92,246,0.35); }
+.status-filter.active.delivered { background: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 14px rgba(16,185,129,0.35); }
+.status-filter.active.cancelled { background: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 4px 14px rgba(239,68,68,0.35); }
+
+.status-filter.active .count { background: rgba(255,255,255,0.2); }
+
+/* Responsive: smaller pills on mobile */
+@media (max-width: 640px) {
+  .status-filter { padding: 6px 12px; font-size: 0.75rem; gap: 4px; }
+  .status-filter .count { min-width: 18px; height: 18px; font-size: 0.625rem; }
+}
+
+/* Delivery Method Toggle */
+.method-btn { border-color: #e2e8f0; background: white; cursor: pointer; }
+.method-btn:hover { border-color: #cbd5e1; }
+.method-btn.active { border-color: #059669; background: #f0fdf4; }
+.method-btn.active .text-slate-800 { color: #065f46; }
+
+/* Address Card */
+.address-card { transition: all 0.2s ease; }
+.address-card:hover { border-color: #94a3b8; }
+.address-card.selected { border-color: #059669; background: #f0fdf4; }
+
+/* Tracking Map Fixes */
+#tracking-map .leaflet-control-zoom a { width: 30px !important; height: 30px !important; line-height: 30px !important; font-size: 18px !important; }
+@media (max-width: 640px) {
+  #tracking-map .leaflet-control-zoom a { width: 26px !important; height: 26px !important; line-height: 26px !important; font-size: 15px !important; }
+}
+
 

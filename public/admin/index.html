@@ -63,12 +63,16 @@
         </div>
 
       <!-- Stats -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8" id="stats-grid">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📦</div><div class="text-2xl font-extrabold text-slate-800" id="stat-products">-</div><div class="text-xs text-slate-500">Total Products</div></div>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8" id="stats-grid">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📋</div><div class="text-2xl font-extrabold text-slate-800" id="stat-orders">-</div><div class="text-xs text-slate-500">Total Orders</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">👥</div><div class="text-2xl font-extrabold text-slate-800" id="stat-users">-</div><div class="text-xs text-slate-500">Customers</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">💰</div><div class="text-2xl font-extrabold text-brand-600" id="stat-revenue">-</div><div class="text-xs text-slate-500">Total Revenue</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">👥</div><div class="text-2xl font-extrabold text-slate-800" id="stat-users">-</div><div class="text-xs text-slate-500">Total Users</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">💰</div><div class="text-2xl font-extrabold text-brand-600" id="stat-revenue">-</div><div class="text-xs text-slate-500">Revenue</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📦</div><div class="text-2xl font-extrabold text-slate-800" id="stat-products">-</div><div class="text-xs text-slate-500">Total Products</div></div>
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">⏳</div><div class="text-2xl font-extrabold text-energy-600" id="stat-pending">-</div><div class="text-xs text-slate-500">Pending Orders</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">☀️</div><div class="text-2xl font-extrabold text-amber-600" id="stat-today-sales">-</div><div class="text-xs text-slate-500">Today's Sales</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📅</div><div class="text-2xl font-extrabold text-blue-600" id="stat-weekly-sales">-</div><div class="text-xs text-slate-500">Weekly Sales</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📆</div><div class="text-2xl font-extrabold text-purple-600" id="stat-monthly-sales">-</div><div class="text-xs text-slate-500">Monthly Sales</div></div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">🏆</div><div class="text-lg font-extrabold text-slate-800" id="stat-top-product">-</div><div class="text-xs text-slate-500">Top Selling Product</div></div>
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">⚠️</div><div class="text-2xl font-extrabold text-red-600" id="stat-outofstock">-</div><div class="text-xs text-slate-500">Out of Stock</div></div>
       </div>
 
@@ -88,7 +92,7 @@
         <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-slate-800">👥 Customer Order History</h3><span class="text-xs text-slate-400">Total orders per customer</span></div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead><tr class="text-left text-xs text-slate-500 uppercase tracking-wider"><th class="pb-3 pr-4">Customer</th><th class="pb-3 pr-4">Email</th><th class="pb-3 pr-4">Phone</th><th class="pb-3 pr-4">Total Orders</th><th class="pb-3">Total Spent</th></tr></thead>
+            <thead><tr class="text-left text-xs text-slate-500 uppercase tracking-wider"><th class="pb-3 pr-4">Customer</th><th class="pb-3 pr-4">Email</th><th class="pb-3 pr-4">Phone</th><th class="pb-3 pr-4">Total Orders</th><th class="pb-3 pr-4">Total Spent</th><th class="pb-3">Action</th></tr></thead>
             <tbody id="user-stats-body" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>

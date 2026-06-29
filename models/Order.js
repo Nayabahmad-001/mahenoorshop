@@ -18,11 +18,12 @@ const statusHistorySchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   items: [orderItemSchema],
+  deliveryMethod: { type: String, enum: ['delivery', 'pickup'], default: 'delivery' },
   shippingAddress: {
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    pincode: { type: String, required: true }
+    street: { type: String },
+    city: { type: String },
+    state: { type: String },
+    pincode: { type: String }
   },
   phone: { type: String, required: true },
   subtotal: { type: Number, required: true },
@@ -33,6 +34,13 @@ const orderSchema = new mongoose.Schema({
   deliveryLocation: {
     lat: { type: Number },
     lng: { type: Number }
+  },
+  pickupStore: {
+    id: String,
+    name: String,
+    address: String,
+    phone: String,
+    hours: String
   },
   status: {
     type: String,
@@ -51,7 +59,12 @@ const orderSchema = new mongoose.Schema({
   deliveryPartner: {
     name: String,
     phone: String,
-    liveLocationLink: String
+    liveLocationLink: String,
+    liveLocation: {
+      lat: Number,
+      lng: Number,
+      updatedAt: Date
+    }
   }
 }, { timestamps: true });
 
