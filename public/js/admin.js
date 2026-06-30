@@ -78,6 +78,8 @@ async function loadDashboard() {
       </tr>
     `).join('') : '<tr><td colspan="6" class="py-8 text-center text-slate-400">No customers yet</td></tr>';
   } catch (err) { console.error(err); }
+
+  loadCharts();
 }
 
 /* ===================== PRODUCTS ===================== */
@@ -388,6 +390,103 @@ document.addEventListener('click', (e) => {
     dd.classList.add('hidden');
   }
 });
+
+/* ===================== CHARTS ===================== */
+function loadCharts() {
+  const hasCharts = document.getElementById('chart-status');
+  if (!hasCharts) return;
+
+  apiCall('/admin/charts').then(d => {
+    const commonOpts = {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, font: { size: 11 } } } }
+    };
+
+    // Order Status Distribution
+    const statusEl = document.getElementById('chart-status');
+    if (statusEl) {
+      const statusMap = { pending: '#f59e0b', confirmed: '#3b82f6', dispatched: '#8b5cf6', delivered: '#10b981', cancelled: '#ef4444' };
+      const labels = [], data = [], colors = [];
+      (d.statusDist || []).forEach(s => { if (s._id && statusMap[s._id]) { labels.push(s._id.charAt(0).toUpperCase() + s._id.slice(1)); data.push(s.count); colors.push(statusMap[s._id]); } });
+      new Chart(statusEl, { type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] }, options: { ...commonOpts, cutout: '60%', plugins: { ...commonOpts.plugins, legend: { ...commonOpts.plugins.legend, position: 'right' } } } });
+    }
+
+    // Category Sales
+    const catEl = document.getElementById('chart-category');
+    if (catEl) {
+      const catLabels = [], catData = [], catColors = ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ef4444', '#ec4899'];
+      (d.categorySales || []).forEach((c, i) => { catLabels.push(c._id); catData.push(c.revenue || 0); });
+      new Chart(catEl, { type: 'doughnut', data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: catColors.slice(0, catLabels.length), borderWidth: 0 }] }, options: { ...commonOpts, cutout: '60%' } });
+    }
+
+    // Daily Sales (7 days)
+    const dailyEl = document.getElementById('chart-daily');
+    if (dailyEl) {
+      const dayLabels = [], dayRevenue = [], dayOrders = [];
+      (d.dailySales || []).forEach(s => {
+        const date = new Date(s._id + 'T00:00:00');
+        dayLabels.push(date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' }));
+        dayRevenue.push(s.revenue || 0);
+        dayOrders.push(s.orders || 0);
+      });
+      new Chart(dailyEl, {
+        type: 'bar', data: { labels: dayLabels, datasets: [
+          { label: 'Revenue (₹)', data: dayRevenue, backgroundColor: '#10b981', borderRadius: 6, yAxisID: 'y' },
+          { label: 'Orders', data: dayOrders, backgroundColor: '#f59e0b', borderRadius: 6, yAxisID: 'y1' }
+        ]},
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { callback: v => '₹' + v } },
+            y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { callback: v => v } }
+          }
+        }
+      });
+    }
+
+    // Top 5 Products
+    const topEl = document.getElementById('chart-top-products');
+    if (topEl) {
+      const pLabels = [], pData = [], pRev = [];
+      (d.topProducts || []).forEach(p => { pLabels.push(p.name?.length > 15 ? p.name.slice(0, 15) + '…' : p.name); pData.push(p.totalQty || 0); pRev.push(p.revenue || 0); });
+      new Chart(topEl, {
+        type: 'bar', data: { labels: pLabels, datasets: [
+          { label: 'Qty Sold', data: pData, backgroundColor: '#8b5cf6', borderRadius: 6 },
+          { label: 'Revenue (₹)', data: pRev, backgroundColor: '#10b981', borderRadius: 6 }
+        ]},
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } }
+      });
+    }
+
+    // Monthly Revenue
+    const monthlyEl = document.getElementById('chart-monthly');
+    if (monthlyEl) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const mRev = [], mOrd = [];
+      (d.monthlySales || []).forEach(m => { mRev[m._id - 1] = m.revenue || 0; mOrd[m._id - 1] = m.orders || 0; });
+      const mLabels = months.slice(0, new Date().getMonth() + 1);
+      const mRevData = mLabels.map((_, i) => mRev[i] || 0);
+      const mOrdData = mLabels.map((_, i) => mOrd[i] || 0);
+      new Chart(monthlyEl, {
+        type: 'line', data: { labels: mLabels, datasets: [
+          { label: 'Revenue (₹)', data: mRevData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4, yAxisID: 'y' },
+          { label: 'Orders', data: mOrdData, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', fill: true, tension: 0.4, yAxisID: 'y1' }
+        ]},
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { callback: v => '₹' + v } },
+            y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { callback: v => v } }
+          }
+        }
+      });
+    }
+  }).catch(err => console.error('Charts error:', err));
+}
 
 /* Init */
 document.addEventListener('DOMContentLoaded', () => {

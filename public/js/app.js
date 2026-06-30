@@ -205,10 +205,10 @@ function renderProducts(products) {
       : `<div class="flex items-center justify-center text-5xl md:text-6xl">${icon}</div>`;
 
     return `
-      <div class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col slide-up">
-        <div class="relative h-40 md:h-48 flex items-center justify-center text-5xl md:text-6xl overflow-hidden" style="background:${COLORS[p.category] || '#f8fafc'}">
+      <div class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col slide-up hover-lift">
+        <div class="relative h-40 md:h-48 flex items-center justify-center text-5xl md:text-6xl overflow-hidden img-zoom" style="background:${COLORS[p.category] || '#f8fafc'}">
           ${imgHtml}
-          ${discount >= 5 ? `<div class="absolute top-3 right-3 bg-energy-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg">${discount}% OFF</div>` : ''}
+          ${discount >= 5 ? `<div class="absolute top-3 right-3 discount-badge">${discount}% OFF</div>` : ''}
           ${savings >= 10 ? `<div class="absolute top-3 left-3 bg-amber-400 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-lg">Save ₹${savings}</div>` : ''}
           <button onclick='shareProduct("${p._id}","${p.name.replace(/"/g, '&quot;')}",${p.sellingPrice},"${p.unit}")' class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/90 shadow-md flex items-center justify-center hover:bg-white transition z-10" title="Share via WhatsApp">
             <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>

@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Mahenoor Kirana</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{brand:{500:'#10b981',600:'#059669',700:'#047857'},energy:{500:'#f97316',600:'#ea580c'}}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',300:'#6ee7b7',400:'#34d399',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b'},energy:{50:'#fffbeb',100:'#fef3c7',200:'#fde68a',300:'#fcd34d',400:'#fbbf24',500:'#f59e0b',600:'#d97706',700:'#b45309',800:'#92400e',900:'#78350f'}}}}}</script>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <div class="flex min-h-screen bg-slate-50">
     <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 text-white shrink-0 hidden md:block">
-      <div class="p-5 border-b border-slate-800">
-        <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center font-bold text-sm">M</div><div><div class="font-bold text-sm">Mahenoor Kirana</div><div class="text-xs text-slate-500">Admin Panel</div></div></div>
+    <aside class="w-64 gradient-admin text-white shrink-0 hidden md:block">
+      <div class="p-5 border-b border-white/10">
+        <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center font-bold text-sm shadow-lg">M</div><div><div class="font-bold text-sm">Mahenoor Kirana</div><div class="text-xs text-slate-400">Admin Panel</div></div></div>
       </div>
       <nav class="p-4 space-y-1">
         <a href="/admin/index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-brand-600/20 text-brand-300 font-medium text-sm">📊 Dashboard</a>
-        <a href="/admin/products.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 font-medium text-sm transition">📦 Products</a>
-        <a href="/admin/orders.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 font-medium text-sm transition">📋 Orders</a>
-        <hr class="border-slate-800 my-3">
-        <a href="/" target="_blank" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 font-medium text-sm transition">🏪 View Store</a>
-        <a href="#" id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-red-300 hover:bg-slate-800 font-medium text-sm transition">🚪 Logout</a>
+        <a href="/admin/products.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 font-medium text-sm transition">📦 Products</a>
+        <a href="/admin/orders.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 font-medium text-sm transition">📋 Orders</a>
+        <hr class="border-white/10 my-3">
+        <a href="/" target="_blank" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 font-medium text-sm transition">🏪 View Store</a>
+        <a href="#" id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-red-300 hover:bg-white/10 font-medium text-sm transition">🚪 Logout</a>
       </nav>
     </aside>
 
@@ -42,12 +42,15 @@
             <p class="text-sm text-slate-500" id="admin-greeting">Welcome back</p>
           </div>
           <div class="flex items-center gap-3">
+            <button id="dark-mode-btn" onclick="toggleDarkMode()" class="p-2.5 rounded-xl hover:bg-slate-100 transition text-slate-500 hover:text-brand-600" title="Dark Mode">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            </button>
             <div class="relative">
               <button onclick="toggleNotifications()" class="relative p-2.5 rounded-xl hover:bg-slate-100 transition text-slate-500 hover:text-brand-600" id="notif-btn">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 <span id="notif-badge" class="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center hidden">0</span>
               </button>
-              <div id="notif-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 max-h-[450px] flex flex-col">
+              <div id="notif-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-premium-xl border border-slate-200 z-50 max-h-[450px] flex flex-col">
                 <div class="flex items-center justify-between p-4 border-b border-slate-100">
                   <h3 class="font-bold text-slate-800 text-sm">Notifications</h3>
                   <button onclick="markAllNotifRead()" class="text-xs font-semibold text-brand-600 hover:text-brand-700">Mark all read</button>
@@ -58,26 +61,52 @@
               </div>
             </div>
             <span id="admin-name" class="text-sm font-medium text-slate-600 hidden md:inline"></span>
-            <div id="admin-avatar" class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm"></div>
+            <div id="admin-avatar" class="w-10 h-10 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-sm shadow-md"></div>
           </div>
         </div>
 
       <!-- Stats -->
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8" id="stats-grid">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📋</div><div class="text-2xl font-extrabold text-slate-800" id="stat-orders">-</div><div class="text-xs text-slate-500">Total Orders</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">👥</div><div class="text-2xl font-extrabold text-slate-800" id="stat-users">-</div><div class="text-xs text-slate-500">Total Users</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">💰</div><div class="text-2xl font-extrabold text-brand-600" id="stat-revenue">-</div><div class="text-xs text-slate-500">Revenue</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📦</div><div class="text-2xl font-extrabold text-slate-800" id="stat-products">-</div><div class="text-xs text-slate-500">Total Products</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">⏳</div><div class="text-2xl font-extrabold text-energy-600" id="stat-pending">-</div><div class="text-xs text-slate-500">Pending Orders</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">☀️</div><div class="text-2xl font-extrabold text-amber-600" id="stat-today-sales">-</div><div class="text-xs text-slate-500">Today's Sales</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📅</div><div class="text-2xl font-extrabold text-blue-600" id="stat-weekly-sales">-</div><div class="text-xs text-slate-500">Weekly Sales</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">📆</div><div class="text-2xl font-extrabold text-purple-600" id="stat-monthly-sales">-</div><div class="text-xs text-slate-500">Monthly Sales</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">🏆</div><div class="text-lg font-extrabold text-slate-800" id="stat-top-product">-</div><div class="text-xs text-slate-500">Top Selling Product</div></div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"><div class="text-2xl mb-1">⚠️</div><div class="text-2xl font-extrabold text-red-600" id="stat-outofstock">-</div><div class="text-xs text-slate-500">Out of Stock</div></div>
+      <div data-animate-stagger class="animate-stagger grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8" id="stats-grid">
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">📋</div><div class="text-2xl font-extrabold text-slate-800" id="stat-orders">-</div><div class="text-xs text-slate-500">Total Orders</div></div>
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">👥</div><div class="text-2xl font-extrabold text-slate-800" id="stat-users">-</div><div class="text-xs text-slate-500">Total Users</div></div>
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">💰</div><div class="text-2xl font-extrabold text-gradient-brand" id="stat-revenue">-</div><div class="text-xs text-slate-500">Revenue</div></div>
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">📦</div><div class="text-2xl font-extrabold text-slate-800" id="stat-products">-</div><div class="text-xs text-slate-500">Total Products</div></div>
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">⏳</div><div class="text-2xl font-extrabold text-energy-600" id="stat-pending">-</div><div class="text-xs text-slate-500">Pending Orders</div></div>
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">☀️</div><div class="text-2xl font-extrabold text-amber-600" id="stat-today-sales">-</div><div class="text-xs text-slate-500">Today's Sales</div></div>
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">📅</div><div class="text-2xl font-extrabold text-blue-600" id="stat-weekly-sales">-</div><div class="text-xs text-slate-500">Weekly Sales</div></div>
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">📆</div><div class="text-2xl font-extrabold text-purple-600" id="stat-monthly-sales">-</div><div class="text-xs text-slate-500">Monthly Sales</div></div>
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">🏆</div><div class="text-lg font-extrabold text-slate-800" id="stat-top-product">-</div><div class="text-xs text-slate-500">Top Selling Product</div></div>
+        <div class="admin-stat-card bg-white rounded-2xl shadow-premium border border-slate-200 p-4"><div class="text-2xl mb-1">⚠️</div><div class="text-2xl font-extrabold text-red-600" id="stat-outofstock">-</div><div class="text-xs text-slate-500">Out of Stock</div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <h3 class="font-bold text-slate-800 mb-4">📊 Order Status</h3>
+          <div class="relative" style="height:260px"><canvas id="chart-status"></canvas></div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <h3 class="font-bold text-slate-800 mb-4">🧺 Category Sales</h3>
+          <div class="relative" style="height:260px"><canvas id="chart-category"></canvas></div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <h3 class="font-bold text-slate-800 mb-4">📈 Daily Sales (7 days)</h3>
+          <div class="relative" style="height:260px"><canvas id="chart-daily"></canvas></div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <h3 class="font-bold text-slate-800 mb-4">🏆 Top 5 Products</h3>
+          <div class="relative" style="height:260px"><canvas id="chart-top-products"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Monthly Sales Chart -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <h3 class="font-bold text-slate-800 mb-4">📅 Monthly Revenue (This Year)</h3>
+        <div class="relative" style="height:260px"><canvas id="chart-monthly"></canvas></div>
       </div>
 
       <!-- Recent Orders -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+      <div data-animate="slide-up" data-animate-delay="200" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-slate-800">Recent Orders</h3><a href="/admin/orders.html" class="text-sm text-brand-600 font-semibold hover:text-brand-700">View All →</a></div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -88,7 +117,7 @@
       </div>
 
       <!-- User Order History -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+      <div data-animate="slide-up" data-animate-delay="300" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
         <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-slate-800">👥 Customer Order History</h3><span class="text-xs text-slate-400">Total orders per customer</span></div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -100,7 +129,9 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="/js/firebase-client.js"></script>
   <script src="/js/admin.js"></script>
 </body>
 </html>

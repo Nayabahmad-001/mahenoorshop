@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Tracking - Mahenoor Kirana</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{brand:{500:'#10b981',600:'#059669',700:'#047857'},energy:{500:'#f97316',600:'#ea580c'}}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',300:'#6ee7b7',400:'#34d399',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b'},energy:{50:'#fffbeb',100:'#fef3c7',200:'#fde68a',300:'#fcd34d',400:'#fbbf24',500:'#f59e0b',600:'#d97706',700:'#b45309',800:'#92400e',900:'#78350f'}}}}}</script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -21,11 +21,11 @@
   <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
       <a href="/" class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-sm">M</div><span class="font-extrabold text-lg">Mahenoor <span class="text-energy-600">Kirana</span></span></a>
-      <div class="flex items-center gap-4 text-sm font-medium"><a href="/pages/my-orders.html" class="text-slate-600 hover:text-brand-600">← Back to Orders</a></div>
+      <div class="flex items-center gap-4 text-sm font-medium"><button id="dark-mode-btn" onclick="toggleDarkMode()" class="p-2 rounded-xl hover:bg-slate-100 transition text-slate-500 hover:text-brand-600" title="Dark Mode"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></button><a href="/pages/my-orders.html" class="text-slate-600 hover:text-brand-600">← Back to Orders</a></div>
     </div>
   </nav>
 
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <div data-animate="slide-up" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div id="loading" class="text-center py-16 text-slate-400"><div class="inline-block w-8 h-8 border-2 border-slate-200 border-t-brand-600 rounded-full animate-spin mb-3"></div><p>Loading tracking info...</p></div>
 
     <div id="error" class="hidden text-center py-16 text-red-500"></div>

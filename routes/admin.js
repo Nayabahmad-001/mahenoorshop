@@ -169,6 +169,45 @@ router.get('/users/stats', async (req, res) => {
   res.json({ users: result });
 });
 
+router.get('/charts', async (req, res) => {
+  const today = new Date(); today.setHours(23, 59, 59, 999);
+  const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+  const yearStart = new Date(); yearStart.setMonth(0, 1); yearStart.setHours(0, 0, 0, 0);
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+
+  const [dailySales, statusDist, topProducts, categorySales, monthlySales, paymentDist] = await Promise.all([
+    Order.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo, $lte: today }, status: { $nin: ['cancelled'] } } },
+      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, revenue: { $sum: '$total' }, orders: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ]),
+    Order.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+    Order.aggregate([
+      { $match: { status: { $nin: ['cancelled'] } } },
+      { $unwind: '$items' },
+      { $group: { _id: '$items.product', name: { $first: '$items.name' }, totalQty: { $sum: '$items.quantity' }, revenue: { $sum: { $multiply: ['$items.sellingPrice', '$items.quantity'] } } } },
+      { $sort: { totalQty: -1 } },
+      { $limit: 5 }
+    ]),
+    Order.aggregate([
+      { $match: { status: { $nin: ['cancelled'] } } },
+      { $unwind: '$items' },
+      { $lookup: { from: 'products', localField: 'items.product', foreignField: '_id', as: 'productInfo' } },
+      { $unwind: { path: '$productInfo', preserveNullAndEmptyArrays: true } },
+      { $group: { _id: { $ifNull: ['$productInfo.category', 'Unknown'] }, revenue: { $sum: { $multiply: ['$items.sellingPrice', '$items.quantity'] } }, count: { $sum: '$items.quantity' } } }
+    ]),
+    Order.aggregate([
+      { $match: { createdAt: { $gte: yearStart }, status: { $nin: ['cancelled'] } } },
+      { $group: { _id: { $month: '$createdAt' }, revenue: { $sum: '$total' }, orders: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ]),
+    Order.aggregate([{ $group: { _id: '$paymentMethod', count: { $sum: 1 } } }])
+  ]);
+
+  res.json({ dailySales, statusDist, topProducts, categorySales, monthlySales, paymentDist });
+});
+
 router.get('/notifications', async (req, res) => {
   const notifications = await Notification.find().sort({ createdAt: -1 }).limit(50);
   const unreadCount = await Notification.countDocuments({ isRead: false });

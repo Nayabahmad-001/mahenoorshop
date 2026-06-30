@@ -4,6 +4,7 @@ const Product = require('../models/Product');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const { protect } = require('../middleware/auth');
+const { sendPushToAllAdmins } = require('../services/notificationService');
 
 const router = express.Router();
 
@@ -121,6 +122,11 @@ router.post('/', protect, async (req, res) => {
 
     const smsMsg = `New Order #${shortId}: ${user.name} ordered ${itemsSummary} Total: Rs.${total}. ${methodLabel}. Phone: ${phone}`;
     sendSmsNotification(smsMsg);
+
+    // FCM push notification to all admin devices
+    const pushTitle = '\u{1F6D2} New Order Received';
+    const pushBody = `Customer: ${user.name}\nOrder ID: #${shortId}\nTotal: \u20B9${total}\nPayment: Cash on Delivery`;
+    sendPushToAllAdmins(pushTitle, pushBody, { url: `/admin/orders.html`, orderId: order._id.toString() });
   } catch (notifErr) {
     console.log('Notification creation failed:', notifErr.message);
   }
